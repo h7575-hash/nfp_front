@@ -6,22 +6,37 @@ import {
     Link
 } from 'react-router-dom';
 import RegistrationPage from './pages/RegistrationPage';
+import HomePage from './pages/HomePage';
+import './App.css';
 
 function App() {
     return (
         <Router>
-            <div>
-                <nav>
-                    <ul>
-                        <li>
-                            <Link to="/register">課題・通知条件登録</Link>
-                        </li>
-                    </ul>
-                </nav>
-                <hr />
-                <Routes>
-                    <Route path="/register" element={<RegistrationPage />} />
-                </Routes>
+            <div className="App">
+                <header className="app-header">
+                    <div className="nav-container">
+                        <Link to="/" className="logo">
+                            <div className="logo-icon">NFP</div>
+                            <span>News for Problem</span>
+                        </Link>
+                        <nav>
+                            <ul className="nav-menu">
+                                <li>
+                                    <Link to="/" className="nav-link">ホーム</Link>
+                                </li>
+                                <li>
+                                    <Link to="/register" className="nav-link">課題登録</Link>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </header>
+                <main className="main-content">
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/register" element={<RegistrationPage />} />
+                    </Routes>
+                </main>
             </div>
         </Router>
     );
