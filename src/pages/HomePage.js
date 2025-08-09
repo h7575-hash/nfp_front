@@ -2,75 +2,105 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const HomePage = () => {
+    // サンプル通知データ
+    const notifications = [
+        {
+            id: 1,
+            title: "新しい技術情報が見つかりました",
+            message: "「自然言語処理による感情分析」に関する最新技術が公開されました。解決可能性: 85%",
+            type: "success",
+            date: "2025-08-09",
+            isRead: false
+        },
+        {
+            id: 2,
+            title: "課題マッチング結果",
+            message: "登録された「リアルタイム画像認識システム」について、新しい解決手法が発見されました。",
+            type: "info",
+            date: "2025-08-08",
+            isRead: true
+        },
+        {
+            id: 3,
+            title: "定期レポート",
+            message: "今週の技術動向レポートをお送りします。AI分野で3つの新しい進展がありました。",
+            type: "info",
+            date: "2025-08-07",
+            isRead: true
+        }
+    ];
+
     return (
-        <div>
-            <section className="hero">
-                <div className="container">
-                    <h1>課題解決の新たな可能性を発見</h1>
-                    <p>
-                        過去に技術的制約で諦めた課題が、最新のAI技術によって解決可能になったかもしれません。
-                        あなたの課題を登録して、解決のチャンスを見つけましょう。
-                    </p>
-                    <Link to="/register" className="btn btn-primary">
-                        課題を登録する
-                    </Link>
+        <div className="container">
+            <div className="page-header">
+                <h1 className="page-title">ダッシュボード</h1>
+                <p className="page-subtitle">
+                    最新の通知と登録された課題の状況をご確認ください
+                </p>
+            </div>
+
+            {/* 通知セクション */}
+            <section className="section">
+                <div className="card">
+                    <div className="card-header">
+                        <h2 className="card-title">📢 最新通知</h2>
+                        <p className="card-subtitle">{notifications.filter(n => !n.isRead).length}件の未読通知があります</p>
+                    </div>
+                    <div className="card-body">
+                        {notifications.map(notification => (
+                            <div key={notification.id} className={`notification-item ${notification.isRead ? 'read' : 'unread'}`}>
+                                <div className="notification-header">
+                                    <h3 className="notification-title">{notification.title}</h3>
+                                    <span className="notification-date">{notification.date}</span>
+                                </div>
+                                <p className="notification-message">{notification.message}</p>
+                                {!notification.isRead && <div className="notification-badge"></div>}
+                            </div>
+                        ))}
+                        <div className="text-center mt-4">
+                            <Link to="/notifications" className="btn btn-secondary">
+                                すべての通知を見る
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section className="container">
-                <div className="page-header">
-                    <h2 className="page-title">サービスの特徴</h2>
-                    <p className="page-subtitle">
-                        最新のAI技術動向と企業課題をマッチングし、新たなソリューションの可能性をお届けします
-                    </p>
-                </div>
-
+            {/* アクションセクション */}
+            <section className="section">
                 <div className="features-grid">
-                    <div className="feature-card fade-in">
-                        <div className="feature-icon">🎯</div>
-                        <h3 className="feature-title">課題特化型マッチング</h3>
+                    <div className="feature-card">
+                        <div className="feature-icon">➕</div>
+                        <h3 className="feature-title">新しい課題を登録</h3>
                         <p className="feature-description">
-                            過去に技術的制約で諦めた具体的な課題を詳細に分析し、
-                            最新のAI技術で解決可能かどうかを評価します。
+                            解決したい技術課題を登録して、最新情報をお知らせします。
                         </p>
+                        <Link to="/register" className="btn btn-primary">
+                            課題を登録する
+                        </Link>
                     </div>
 
-                    <div className="feature-card fade-in">
-                        <div className="feature-icon">🔄</div>
-                        <h3 className="feature-title">リアルタイム技術監視</h3>
+                    <div className="feature-card">
+                        <div className="feature-icon">📋</div>
+                        <h3 className="feature-title">登録済み課題</h3>
                         <p className="feature-description">
-                            主要なAI研究機関、学術論文、オープンソースプロジェクトを
-                            常時監視し、最新の技術動向をキャッチアップします。
+                            これまでに登録した課題の状況と進展をご確認いただけます。
                         </p>
+                        <Link to="/problems" className="btn btn-secondary">
+                            課題一覧を見る
+                        </Link>
                     </div>
 
-                    <div className="feature-card fade-in">
-                        <div className="feature-icon">🤖</div>
-                        <h3 className="feature-title">AI による解決可能性評価</h3>
+                    <div className="feature-card">
+                        <div className="feature-icon">ℹ️</div>
+                        <h3 className="feature-title">サービス概要</h3>
                         <p className="feature-description">
-                            大規模言語モデルを活用して、収集した技術情報が
-                            あなたの課題を解決できる可能性を自動的に評価します。
+                            News dogの機能と特徴について詳しくご紹介します。
                         </p>
+                        <Link to="/service" className="btn btn-secondary">
+                            サービス紹介を見る
+                        </Link>
                     </div>
-
-                    <div className="feature-card fade-in">
-                        <div className="feature-icon">📧</div>
-                        <h3 className="feature-title">タイムリーな通知</h3>
-                        <p className="feature-description">
-                            解決可能性の高い技術が見つかった場合、
-                            詳細な分析結果と関連リソースをメールでお知らせします。
-                        </p>
-                    </div>
-                </div>
-
-                <div className="text-center mt-8">
-                    <h3 className="mb-4">まずは課題を登録してみませんか？</h3>
-                    <p className="text-secondary mb-6">
-                        登録は無料です。あなたの課題が最新技術で解決できるかもしれません。
-                    </p>
-                    <Link to="/register" className="btn btn-success">
-                        無料で課題を登録する
-                    </Link>
                 </div>
             </section>
         </div>
