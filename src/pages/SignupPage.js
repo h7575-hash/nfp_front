@@ -131,8 +131,8 @@ const SignupPage = () => {
         try {
             console.log('ユーザー登録処理:', formData);
             
-            // Cloud Run Function APIへリクエスト送信
-            const response = await fetch('https://newsdog-backend-1072071838370.asia-northeast1.run.app/users', {
+            // プロキシ経由でAPIリクエスト送信
+            const response = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

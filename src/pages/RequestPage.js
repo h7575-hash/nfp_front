@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const RegistrationPage = () => {
+const Requestpage = () => {
     const [problemData, setProblemData] = useState({
         title: '',
         category: '',
@@ -314,4 +314,4 @@ const RegistrationPage = () => {
     );
 };
 
-export default RegistrationPage;
+export default Requestpage;
