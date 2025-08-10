@@ -291,6 +291,7 @@ const SignupPage = () => {
                             name="birth_date"
                             value={formData.birth_date}
                             onChange={handleChange}
+                            defaultValue="2020-01-01"
                             max={new Date().toISOString().split('T')[0]}
                             className={`form-input ${errors.birth_date ? 'error' : ''}`}
                         />

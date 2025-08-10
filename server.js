@@ -18,6 +18,8 @@ app.use('/api/*', async (req, res) => {
         // Google Auth Libraryが自動でトークンを取得・管理
         const client = await auth.getIdTokenClient(BACKEND_URL);
         const apiPath = req.path.replace('/api', '');
+        console.log('Original path:', req.path);
+        console.log('API path to backend:', apiPath);
         
         // 認証済みリクエストを送信（トークンは自動で付与される）
         const backendResponse = await client.request({
