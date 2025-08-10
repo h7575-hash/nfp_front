@@ -5,7 +5,7 @@ import {
     Route,
     Link
 } from 'react-router-dom';
-import Requestpage from './pages/Requestpage';
+import RequestPage from './pages/RequestPage';
 import HomePage from './pages/HomePage';
 import ServicePage from './pages/ServicePage';
 import LoginPage from './pages/LoginPage';
@@ -47,7 +47,7 @@ function App() {
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/service" element={<ServicePage />} />
-                        <Route path="/register" element={<Requestpage />} />
+                        <Route path="/register" element={<RequestPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/signup" element={<SignupPage />} />
                     </Routes>
