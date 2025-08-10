@@ -20,6 +20,7 @@ app.use('/api/*', async (req, res) => {
         const apiPath = req.path.replace('/api', '');
         console.log('Original path:', req.path);
         console.log('API path to backend:', apiPath);
+        console.log('Final URL:', `${BACKEND_URL}${apiPath}`);
         
         // 認証済みリクエストを送信（トークンは自動で付与される）
         const backendResponse = await client.request({
