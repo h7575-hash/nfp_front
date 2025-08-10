@@ -121,13 +121,37 @@ const SignupPage = () => {
         
         try {
             console.log('ユーザー登録処理:', formData);
-            // API呼び出し処理
-            await new Promise(resolve => setTimeout(resolve, 1500)); // 仮の待機
-            // 成功時の処理（リダイレクトなど）
-            alert('登録が完了しました！');
+            
+            // Cloud Run Function APIへリクエスト送信
+            const response = await fetch('https://user-manage-1072071838370.asia-northeast1.run.app', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                    purpose: formData.purpose,
+                    industry: formData.industry,
+                    occupation: formData.occupation,
+                    age: formData.age,
+                    plan: formData.plan
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                alert('登録が完了しました！');
+                // 成功時の処理（ログインページへリダイレクトなど）
+                // window.location.href = '/login';
+            } else {
+                throw new Error(result.error || 'Registration failed');
+            }
+            
         } catch (error) {
             console.error('登録エラー:', error);
-            alert('登録に失敗しました。もう一度お試しください。');
+            alert(`登録に失敗しました: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
