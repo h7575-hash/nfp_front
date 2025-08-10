@@ -9,7 +9,7 @@ const SignupPage = () => {
         purpose: '',
         industry: '',
         occupation: '',
-        age: '',
+        birth_date: '',
         plan: 'free'
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -53,15 +53,6 @@ const SignupPage = () => {
         { value: 'other', label: 'その他' }
     ];
 
-    const ageOptions = [
-        { value: '18-24', label: '18-24歳' },
-        { value: '25-29', label: '25-29歳' },
-        { value: '30-34', label: '30-34歳' },
-        { value: '35-39', label: '35-39歳' },
-        { value: '40-49', label: '40-49歳' },
-        { value: '50-59', label: '50-59歳' },
-        { value: '60+', label: '60歳以上' }
-    ];
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -88,7 +79,25 @@ const SignupPage = () => {
         if (!formData.purpose) newErrors.purpose = '利用目的を選択してください';
         if (!formData.industry) newErrors.industry = '業種を選択してください';
         if (!formData.occupation) newErrors.occupation = '職種を選択してください';
-        if (!formData.age) newErrors.age = '年齢を選択してください';
+        if (!formData.birth_date) newErrors.birth_date = '生年月日を入力してください';
+        if (formData.birth_date) {
+            const birthDate = new Date(formData.birth_date);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            if (age < 18 || age > 100) {
+                newErrors.birth_date = '18歳以上100歳以下の方のみ登録できます';
+            }
+            
+            if (birthDate > today) {
+                newErrors.birth_date = '未来の日付は入力できません';
+            }
+        }
 
         // パスワード一致チェック
         if (formData.password !== formData.confirmPassword) {
@@ -134,7 +143,7 @@ const SignupPage = () => {
                     purpose: formData.purpose,
                     industry: formData.industry,
                     occupation: formData.occupation,
-                    age: formData.age,
+                    birth_date: formData.birth_date,
                     plan: formData.plan
                 })
             });
@@ -271,24 +280,19 @@ const SignupPage = () => {
                         </div>
                     </div>
 
-                    {/* 年齢 */}
+                    {/* 生年月日 */}
                     <div className="form-group">
-                        <label htmlFor="age">年齢 *</label>
-                        <select
-                            id="age"
-                            name="age"
-                            value={formData.age}
+                        <label htmlFor="birth_date">生年月日 *</label>
+                        <input
+                            type="date"
+                            id="birth_date"
+                            name="birth_date"
+                            value={formData.birth_date}
                             onChange={handleChange}
-                            className={`form-input ${errors.age ? 'error' : ''}`}
-                        >
-                            <option value="">選択してください</option>
-                            {ageOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.age && <span className="error-message">{errors.age}</span>}
+                            max={new Date().toISOString().split('T')[0]}
+                            className={`form-input ${errors.birth_date ? 'error' : ''}`}
+                        />
+                        {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
                     </div>
 
                     {/* プラン選択 */}
