@@ -149,13 +149,15 @@ const SignupPage = () => {
             });
             
             const result = await response.json();
+            console.log('Response status:', response.status);
+            console.log('Response data:', result);
             
             if (response.ok && result.success) {
                 alert('登録が完了しました！');
                 // 成功時の処理（ログインページへリダイレクトなど）
                 // window.location.href = '/login';
             } else {
-                throw new Error(result.error || 'Registration failed');
+                throw new Error(result.error || `Registration failed (Status: ${response.status})`);
             }
             
         } catch (error) {
