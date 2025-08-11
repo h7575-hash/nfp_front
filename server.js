@@ -16,7 +16,10 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.use('/api/*', async (req, res) => {
     try {
         // /api/users -> /users, /api/requests -> /requests
-        const apiPath = req.path.replace('/api', '') || '/';
+        let apiPath = req.path.replace('/api', '');
+        if (!apiPath) {
+            apiPath = '/';
+        }
         console.log('Original path:', req.path);
         console.log('API path to backend:', apiPath);
         console.log('Final URL:', `${BACKEND_URL}${apiPath}`);
