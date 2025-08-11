@@ -83,16 +83,6 @@ const SignupPage = () => {
         if (formData.birth_date) {
             const birthDate = new Date(formData.birth_date);
             const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            
-            if (age < 18 || age > 100) {
-                newErrors.birth_date = '18歳以上100歳以下の方のみ登録できます';
-            }
             
             if (birthDate > today) {
                 newErrors.birth_date = '未来の日付は入力できません';
