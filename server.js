@@ -15,22 +15,36 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/api/*', async (req, res) => {
     try {
-        // Google Auth Libraryが自動でトークンを取得・管理
-        const client = await auth.getIdTokenClient(BACKEND_URL);
         const apiPath = req.path.replace('/api', '');
         console.log('Original path:', req.path);
         console.log('API path to backend:', apiPath);
         console.log('Final URL:', `${BACKEND_URL}${apiPath}`);
         
-        // 認証済みリクエストを送信（トークンは自動で付与される）
-        const backendResponse = await client.request({
-            method: req.method,
-            url: `${BACKEND_URL}${apiPath}`,
-            data: req.body,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        // 認証付きリクエストを送信
+        let backendResponse;
+        try {
+            // Google Auth Libraryでサービスアカウント認証を試行
+            const client = await auth.getIdTokenClient(BACKEND_URL);
+            backendResponse = await client.request({
+                method: req.method,
+                url: `${BACKEND_URL}${apiPath}`,
+                data: req.body,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (authError) {
+            console.warn('Authentication failed, trying without auth:', authError.message);
+            // 認証失敗時は直接リクエスト（開発環境用）
+            backendResponse = await axios({
+                method: req.method,
+                url: `${BACKEND_URL}${apiPath}`,
+                data: req.body,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
         
         res.json(backendResponse.data);
     } catch (error) {
