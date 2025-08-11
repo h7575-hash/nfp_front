@@ -15,12 +15,19 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/api/*', async (req, res) => {
     try {
-        // /api/users -> /users, /api/requests -> /requests
-        let apiPath = req.path.replace('/api', '');
-        if (!apiPath) {
+        // Extract the path after /api
+        // req.url includes the full path, req.path is processed by middleware
+        const fullPath = req.originalUrl || req.url;
+        console.log('Full original URL:', fullPath);
+        console.log('req.path:', req.path);
+        console.log('req.url:', req.url);
+        
+        // /api/users -> /users
+        let apiPath = fullPath.replace('/api', '');
+        if (!apiPath || apiPath === '/') {
             apiPath = '/';
         }
-        console.log('Original path:', req.path);
+        
         console.log('API path to backend:', apiPath);
         console.log('Final URL:', `${BACKEND_URL}${apiPath}`);
         
