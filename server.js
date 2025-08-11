@@ -47,16 +47,22 @@ app.all('/api/*', async (req, res) => {
                 }
             });
         } catch (authError) {
+            console.error('Authentication failed:', authError);
             console.warn('Authentication failed, trying without auth:', authError.message);
             // 認証失敗時は直接リクエスト（開発環境用）
-            backendResponse = await axios({
-                method: req.method,
-                url: finalUrl,
-                data: req.body,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            try {
+                backendResponse = await axios({
+                    method: req.method,
+                    url: finalUrl,
+                    data: req.body,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (directRequestError) {
+                console.error('Direct request also failed:', directRequestError.message);
+                throw directRequestError;
+            }
         }
         
         res.json(backendResponse.data);
