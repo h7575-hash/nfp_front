@@ -37,13 +37,18 @@ app.all('/api/*', async (req, res) => {
         let backendResponse;
         try {
             // Google Auth Libraryでサービスアカウント認証を試行
+            console.log('Attempting authenticated request to:', finalUrl);
             const client = await auth.getIdTokenClient(BACKEND_URL);
-            backendResponse = await client.request({
+            const idToken = await client.idTokenProvider.fetchIdToken(BACKEND_URL);
+            console.log('ID token obtained successfully');
+            
+            backendResponse = await axios({
                 method: req.method,
                 url: finalUrl,
                 data: req.body,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 }
             });
         } catch (authError) {
