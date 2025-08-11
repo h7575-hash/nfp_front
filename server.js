@@ -13,23 +13,25 @@ const auth = new GoogleAuth();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.use('/api/*', async (req, res) => {
+// API proxy middleware - handle all /api/* requests
+app.all('/api/*', async (req, res) => {
     try {
         // Extract the path after /api
-        // req.url includes the full path, req.path is processed by middleware
-        const fullPath = req.originalUrl || req.url;
-        console.log('Full original URL:', fullPath);
-        console.log('req.path:', req.path);
-        console.log('req.url:', req.url);
+        const requestedPath = req.originalUrl;
+        console.log('=== API PROXY REQUEST ===');
+        console.log('Full original URL:', requestedPath);
+        console.log('Method:', req.method);
+        console.log('Body:', req.body);
         
-        // /api/users -> /users
-        let apiPath = fullPath.replace('/api', '');
-        if (!apiPath || apiPath === '/') {
-            apiPath = '/';
+        // Convert /api/users -> /users
+        let backendPath = requestedPath.replace(/^\/api/, '');
+        if (!backendPath || backendPath === '/') {
+            backendPath = '/';
         }
         
-        console.log('API path to backend:', apiPath);
-        console.log('Final URL:', `${BACKEND_URL}${apiPath}`);
+        console.log('Backend path:', backendPath);
+        const finalUrl = `${BACKEND_URL}${backendPath}`;
+        console.log('Final backend URL:', finalUrl);
         
         // 認証付きリクエストを送信
         let backendResponse;
@@ -38,7 +40,7 @@ app.use('/api/*', async (req, res) => {
             const client = await auth.getIdTokenClient(BACKEND_URL);
             backendResponse = await client.request({
                 method: req.method,
-                url: `${BACKEND_URL}${apiPath}`,
+                url: finalUrl,
                 data: req.body,
                 headers: {
                     'Content-Type': 'application/json'
@@ -49,7 +51,7 @@ app.use('/api/*', async (req, res) => {
             // 認証失敗時は直接リクエスト（開発環境用）
             backendResponse = await axios({
                 method: req.method,
-                url: `${BACKEND_URL}${apiPath}`,
+                url: finalUrl,
                 data: req.body,
                 headers: {
                     'Content-Type': 'application/json'
