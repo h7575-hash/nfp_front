@@ -1,0 +1,27 @@
+{
+  "navigation": {
+    "home": "Home",
+    "service": "Service",
+    "register": "Register Issue",
+    "login": "Login",
+    "signup": "Sign Up",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "brand": {
+    "name": "News dog"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "submit": "Submit",
+    "reset": "Reset"
+  },
+  "messages": {
+    "logoutConfirm": "Are you sure you want to logout?",
+    "settingsSaved": "Settings saved successfully"
+  }
+}

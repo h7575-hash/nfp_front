@@ -1,0 +1,27 @@
+{
+  "navigation": {
+    "home": "ホーム",
+    "service": "サービス",
+    "register": "課題登録",
+    "login": "ログイン",
+    "signup": "新規登録",
+    "settings": "設定",
+    "logout": "ログアウト"
+  },
+  "brand": {
+    "name": "News dog"
+  },
+  "actions": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "submit": "送信",
+    "reset": "リセット"
+  },
+  "messages": {
+    "logoutConfirm": "ログアウトしますか？",
+    "settingsSaved": "設定が保存されました"
+  }
+}

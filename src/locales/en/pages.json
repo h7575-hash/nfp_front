@@ -1,0 +1,364 @@
+{
+  "home": {
+    "title": "Dashboard",
+    "subtitle": "Check the latest notifications and status of registered issues",
+    "notifications": {
+      "title": "📢 Latest Notifications",
+      "unreadCount": "unread notifications",
+      "viewAll": "View all notifications",
+      "sampleData": {
+        "newTech": {
+          "title": "New technical information found",
+          "message": "Latest technology on 'sentiment analysis by natural language processing' has been published. Solvability: 85%"
+        },
+        "matching": {
+          "title": "Issue matching results",
+          "message": "A new solution method has been discovered for the registered 'real-time image recognition system'."
+        },
+        "report": {
+          "title": "Regular report",
+          "message": "We are sending you this week's technology trend report. There were 3 new developments in the AI field."
+        }
+      }
+    },
+    "actions": {
+      "register": {
+        "title": "Register New Issue",
+        "description": "Register technical issues you want to solve and get notified of the latest information.",
+        "button": "Register Issue"
+      },
+      "problems": {
+        "title": "Registered Issues",
+        "description": "Check the status and progress of issues you have registered so far.",
+        "button": "View Issue List"
+      },
+      "service": {
+        "title": "Service Overview",
+        "description": "Learn more about News dog's features and characteristics.",
+        "button": "View Service Introduction"
+      }
+    }
+  },
+  "service": {
+    "hero": {
+      "title": "Only what you really want to know\nSo you don't forget without realizing it",
+      "subtitle": "Tell us what information you want us to check\nWe'll let you know when we find it!",
+      "cta": "Register what you want to know"
+    },
+    "features": {
+      "title": "Service Features",
+      "subtitle": "We match the latest AI technology trends with corporate challenges and deliver new solution possibilities",
+      "matching": {
+        "title": "Challenge-Specific Matching",
+        "description": "We analyze specific challenges you gave up on due to technical constraints in the past and evaluate whether they can be solved with the latest AI technology."
+      },
+      "monitoring": {
+        "title": "Real-time Technology Monitoring",
+        "description": "We constantly monitor major AI research institutions, academic papers, and open source projects to catch up with the latest technology trends."
+      },
+      "evaluation": {
+        "title": "AI-powered Solvability Assessment",
+        "description": "We leverage large language models to automatically evaluate the possibility that collected technical information can solve your challenges."
+      },
+      "notification": {
+        "title": "Timely Notifications",
+        "description": "When we find technology with high solvability potential, we'll notify you by email with detailed analysis results and related resources."
+      }
+    },
+    "cta": {
+      "title": "Why not register your challenge first?",
+      "subtitle": "Registration is free. Your challenge might be solved with the latest technology.",
+      "button": "Register your challenge for free"
+    }
+  },
+  "register": {
+    "title": "Register Issue",
+    "subtitle": "Please register a new issue",
+    "form": {
+      "problemTitle": "Issue Title",
+      "problemDescription": "Issue Details",
+      "category": "Category",
+      "priority": "Priority",
+      "submit": "Register"
+    }
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Login to access News dog",
+    "form": {
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "rememberMe": "Keep me logged in",
+      "submit": "Login",
+      "submitting": "Logging in...",
+      "forgotPassword": "Forgot your password?"
+    },
+    "footer": {
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign Up"
+    },
+    "social": {
+      "divider": "or",
+      "googleLogin": "Login with Google"
+    }
+  },
+  "signup": {
+    "title": "Sign Up",
+    "subtitle": "Thank you for signing up with News dog",
+    "form": {
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Set with 8 or more characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "purpose": "Purpose of Use",
+      "industry": "Industry",
+      "occupation": "Occupation",
+      "birthDate": "Date of Birth",
+      "plan": "Plan",
+      "submit": "Create Account",
+      "submitting": "Creating...",
+      "termsAgree": "I agree to the terms of service",
+      "termsLink": "Terms of Service",
+      "privacyLink": "Privacy Policy",
+      "selectPlaceholder": "Please select",
+      "and": " and "
+    },
+    "purposes": {
+      "private": "Private",
+      "business": "Business",
+      "both": "Both"
+    },
+    "validation": {
+      "emailRequired": "Email address is required",
+      "passwordRequired": "Password is required",
+      "confirmPasswordRequired": "Password confirmation is required",
+      "purposeRequired": "Please select purpose of use",
+      "industryRequired": "Please select industry",
+      "occupationRequired": "Please select occupation",
+      "birthDateRequired": "Please enter date of birth",
+      "futureDateNotAllowed": "Future dates are not allowed",
+      "passwordMismatch": "Passwords do not match",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "invalidEmail": "Please enter a valid email address",
+      "termsRequired": "Agreement to terms of service is required"
+    },
+    "success": {
+      "registered": "Registration completed successfully!"
+    },
+    "errors": {
+      "registrationFailed": "Registration failed"
+    },
+    "industries": {
+      "tech": "IT & Technology",
+      "finance": "Finance & Insurance",
+      "manufacturing": "Manufacturing",
+      "healthcare": "Healthcare",
+      "retail": "Retail & E-commerce",
+      "education": "Education",
+      "consulting": "Consulting",
+      "media": "Media & Advertising",
+      "logistics": "Logistics & Transportation",
+      "construction": "Construction & Real Estate",
+      "government": "Government & Public",
+      "other": "Other"
+    },
+    "occupations": {
+      "engineer": "Engineer",
+      "designer": "Designer",
+      "manager": "Manager",
+      "consultant": "Consultant",
+      "researcher": "Researcher",
+      "sales": "Sales",
+      "marketing": "Marketing",
+      "hr": "Human Resources",
+      "finance": "Finance & Accounting",
+      "student": "Student",
+      "freelancer": "Freelancer",
+      "other": "Other"
+    },
+    "plans": {
+      "free": "Free Plan",
+      "freeDescription": "Access basic notification features",
+      "freePrice": "$0/month",
+      "premium": "Premium Plan",
+      "premiumDescription": "Advanced analytics and priority notifications",
+      "premiumPrice": "$9.80/month"
+    },
+    "footer": {
+      "hasAccount": "Already have an account? ",
+      "loginLink": "Login",
+      "termsAgreement": "By registering, you agree to the ",
+      "termsAgreementEnd": "."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and application settings",
+    "sections": {
+      "notifications": "Notification Settings",
+      "display": "Display Settings",
+      "profile": "Update Profile Information",
+      "deleteAccount": "Delete Account"
+    },
+    "notifications": {
+      "push": "Push Notifications",
+      "email": "Email Notifications"
+    },
+    "display": {
+      "theme": "Theme",
+      "language": "Language",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto"
+      },
+      "languages": {
+        "ja": "Japanese",
+        "en": "English"
+      }
+    },
+    "preferences": {
+      "aiAvatar": "AI Avatar",
+      "avatars": {
+        "dog": "Dog",
+        "cat": "Cat",
+        "goat": "Goat"
+      }
+    },
+    "profile": {
+      "updateProfile": "Update Profile Information"
+    },
+    "deleteAccount": {
+      "deleteAccount": "Delete Account"
+    },
+    "actions": {
+      "saveSettings": "Save Settings"
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated",
+    "draftNotice": "[DRAFT VERSION] This document is a provisional version for a service under development.",
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "content": "These Terms of Service (\"Terms\") govern your use of News for Problem (\"Service\"). By using our Service, you agree to be bound by these Terms."
+      },
+      "service": {
+        "title": "Service Description",
+        "content": "Our Service matches the latest AI technology trends with corporate challenges to deliver new solution possibilities. Users can register their challenges and receive notifications about relevant technical information."
+      },
+      "account": {
+        "title": "Account Management",
+        "items": {
+          "responsibility": "Users are responsible for maintaining the confidentiality of their account information.",
+          "security": "Proper password management and prohibition of sharing with third parties.",
+          "accuracy": "Maintaining accuracy and currency of registration information."
+        }
+      },
+      "usage": {
+        "title": "Usage Rules",
+        "items": {
+          "lawful": "Prohibition of activities that violate laws, regulations, or public order.",
+          "noHarm": "Prohibition of activities that harm other users or third parties.",
+          "noInfringement": "Prohibition of intellectual property infringement or unauthorized access."
+        }
+      },
+      "privacy": {
+        "title": "Privacy Protection",
+        "content": "We appropriately protect users' personal information in accordance with our Privacy Policy. Please refer to our Privacy Policy for details."
+      },
+      "limitation": {
+        "title": "Limitation of Liability",
+        "content": "Our Service is provided 'as is' without any warranties regarding completeness, accuracy, or reliability. We assume no responsibility for any damages arising from the use of our Service."
+      },
+      "termination": {
+        "title": "Service Suspension and Termination",
+        "content": "We may temporarily suspend or terminate all or part of the Service without prior notice. We may also suspend or delete accounts of users who violate these Terms."
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "content": "We may modify these Terms as necessary. Modified Terms become effective upon publication on our website. Continued use of the Service constitutes acceptance of the modified Terms."
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "If you have any questions about these Terms, please contact us at the following address."
+      }
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated",
+    "draftNotice": "[DRAFT VERSION] This document is a provisional version for a service under development.",
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "content": "News for Problem (\"Service\") respects user privacy and is committed to appropriate protection of personal information. This Privacy Policy explains the personal information we collect, use, store, and disclose in our Service."
+      },
+      "collection": {
+        "title": "Information We Collect",
+        "items": {
+          "personal": "Personal information such as name, email address, date of birth, occupation, and industry",
+          "usage": "Service usage status, access logs, and click information",
+          "technical": "IP address, browser information, and device information",
+          "communication": "Content of inquiries and support communications"
+        }
+      },
+      "usage": {
+        "title": "Purpose of Information Use",
+        "items": {
+          "service": "Providing, maintaining, and improving the Service",
+          "communication": "Communication with users and providing support",
+          "improvement": "Service quality improvement and new feature development",
+          "legal": "Fulfilling legal obligations and preventing unauthorized use"
+        }
+      },
+      "sharing": {
+        "title": "Third-Party Disclosure",
+        "content": "We do not provide personal information to third parties without user consent, except in the following cases:",
+        "items": {
+          "consent": "When user consent is obtained",
+          "legal": "When mandatory disclosure is required by law",
+          "business": "In case of business transfer, merger, etc."
+        }
+      },
+      "security": {
+        "title": "Security Measures",
+        "content": "We implement appropriate technical and organizational security measures to prevent unauthorized access, loss, destruction, alteration, or leakage of personal information."
+      },
+      "cookies": {
+        "title": "Use of Cookies",
+        "content": "Our Service uses cookies to improve user convenience and service improvement. If you do not wish to use cookies, you can disable them in your browser settings, but some service functions may be limited."
+      },
+      "rights": {
+        "title": "User Rights",
+        "items": {
+          "access": "Right to request disclosure of personal information",
+          "correction": "Right to request correction, addition, or deletion of personal information",
+          "deletion": "Right to request suspension or deletion of personal information use",
+          "portability": "Right to data portability of personal information"
+        }
+      },
+      "retention": {
+        "title": "Information Retention Period",
+        "content": "Personal information is retained for the period necessary to achieve the purpose of use or for the period stipulated by law. After the retention period expires, it will be safely disposed of in an appropriate manner."
+      },
+      "children": {
+        "title": "Children's Information",
+        "content": "Our Service is not intended for children under 13 years of age, and we do not intentionally collect personal information from children under 13."
+      },
+      "changes": {
+        "title": "Policy Changes",
+        "content": "This Privacy Policy may be changed as necessary. In case of significant changes, we will notify users in advance."
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "If you have any questions or requests regarding the handling of personal information, please contact us at the following address."
+      }
+    }
+  }
+}

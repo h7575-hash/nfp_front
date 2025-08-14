@@ -1,0 +1,364 @@
+{
+  "home": {
+    "title": "ダッシュボード",
+    "subtitle": "最新の通知と登録された課題の状況をご確認ください",
+    "notifications": {
+      "title": "📢 最新通知",
+      "unreadCount": "件の未読通知があります",
+      "viewAll": "すべての通知を見る",
+      "sampleData": {
+        "newTech": {
+          "title": "新しい技術情報が見つかりました",
+          "message": "「自然言語処理による感情分析」に関する最新技術が公開されました。解決可能性: 85%"
+        },
+        "matching": {
+          "title": "課題マッチング結果",
+          "message": "登録された「リアルタイム画像認識システム」について、新しい解決手法が発見されました。"
+        },
+        "report": {
+          "title": "定期レポート",
+          "message": "今週の技術動向レポートをお送りします。AI分野で3つの新しい進展がありました。"
+        }
+      }
+    },
+    "actions": {
+      "register": {
+        "title": "新しい課題を登録",
+        "description": "解決したい技術課題を登録して、最新情報をお知らせします。",
+        "button": "課題を登録する"
+      },
+      "problems": {
+        "title": "登録済み課題",
+        "description": "これまでに登録した課題の状況と進展をご確認いただけます。",
+        "button": "課題一覧を見る"
+      },
+      "service": {
+        "title": "サービス概要",
+        "description": "News dogの機能と特徴について詳しくご紹介します。",
+        "button": "サービス紹介を見る"
+      }
+    }
+  },
+  "service": {
+    "hero": {
+      "title": "本当に知りたいことだけを\nいつの間にか忘れないように",
+      "subtitle": "チェックしてほしい情報を教えてください\n見つけたらお知らせします！",
+      "cta": "知りたいことを登録する"
+    },
+    "features": {
+      "title": "サービスの特徴",
+      "subtitle": "最新のAI技術動向と企業課題をマッチングし、新たなソリューションの可能性をお届けします",
+      "matching": {
+        "title": "課題特化型マッチング",
+        "description": "過去に技術的制約で諦めた具体的な課題を詳細に分析し、最新のAI技術で解決可能かどうかを評価します。"
+      },
+      "monitoring": {
+        "title": "リアルタイム技術監視",
+        "description": "主要なAI研究機関、学術論文、オープンソースプロジェクトを常時監視し、最新の技術動向をキャッチアップします。"
+      },
+      "evaluation": {
+        "title": "AI による解決可能性評価",
+        "description": "大規模言語モデルを活用して、収集した技術情報があなたの課題を解決できる可能性を自動的に評価します。"
+      },
+      "notification": {
+        "title": "タイムリーな通知",
+        "description": "解決可能性の高い技術が見つかった場合、詳細な分析結果と関連リソースをメールでお知らせします。"
+      }
+    },
+    "cta": {
+      "title": "まずは課題を登録してみませんか？",
+      "subtitle": "登録は無料です。あなたの課題が最新技術で解決できるかもしれません。",
+      "button": "無料で課題を登録する"
+    }
+  },
+  "register": {
+    "title": "課題登録",
+    "subtitle": "新しい課題を登録してください",
+    "form": {
+      "problemTitle": "課題タイトル",
+      "problemDescription": "課題の詳細",
+      "category": "カテゴリー",
+      "priority": "優先度",
+      "submit": "登録する"
+    }
+  },
+  "login": {
+    "title": "ログイン",
+    "subtitle": "News dogにアクセスするためにログインしてください",
+    "form": {
+      "email": "メールアドレス",
+      "emailPlaceholder": "your@email.com",
+      "password": "パスワード",
+      "passwordPlaceholder": "パスワードを入力",
+      "rememberMe": "ログイン状態を保持する",
+      "submit": "ログイン",
+      "submitting": "ログイン中...",
+      "forgotPassword": "パスワードをお忘れですか？"
+    },
+    "footer": {
+      "noAccount": "アカウントをお持ちでないですか？",
+      "signupLink": "新規登録"
+    },
+    "social": {
+      "divider": "または",
+      "googleLogin": "Googleでログイン"
+    }
+  },
+  "signup": {
+    "title": "新規登録",
+    "subtitle": "News dogにご登録いただき、ありがとうございます",
+    "form": {
+      "email": "メールアドレス",
+      "emailPlaceholder": "your@email.com",
+      "password": "パスワード",
+      "passwordPlaceholder": "8文字以上で設定してください",
+      "confirmPassword": "パスワード確認",
+      "confirmPasswordPlaceholder": "パスワードを再入力してください",
+      "purpose": "利用目的",
+      "industry": "業界",
+      "occupation": "職種",
+      "birthDate": "生年月日",
+      "plan": "プラン",
+      "submit": "アカウントを作成",
+      "submitting": "作成中...",
+      "termsAgree": "利用規約に同意します",
+      "termsLink": "利用規約",
+      "privacyLink": "プライバシーポリシー",
+      "selectPlaceholder": "選択してください",
+      "and": "と"
+    },
+    "purposes": {
+      "private": "プライベート",
+      "business": "ビジネス",
+      "both": "両方"
+    },
+    "validation": {
+      "emailRequired": "メールアドレスは必須です",
+      "passwordRequired": "パスワードは必須です",
+      "confirmPasswordRequired": "パスワード確認は必須です",
+      "purposeRequired": "利用目的を選択してください",
+      "industryRequired": "業種を選択してください",
+      "occupationRequired": "職種を選択してください",
+      "birthDateRequired": "生年月日を入力してください",
+      "futureDateNotAllowed": "未来の日付は入力できません",
+      "passwordMismatch": "パスワードが一致しません",
+      "passwordMinLength": "パスワードは8文字以上で入力してください",
+      "invalidEmail": "有効なメールアドレスを入力してください",
+      "termsRequired": "利用規約への同意が必要です"
+    },
+    "success": {
+      "registered": "登録が完了しました！"
+    },
+    "errors": {
+      "registrationFailed": "登録に失敗しました"
+    },
+    "industries": {
+      "tech": "IT・テクノロジー",
+      "finance": "金融・保険",
+      "manufacturing": "製造業",
+      "healthcare": "医療・ヘルスケア",
+      "retail": "小売・EC",
+      "education": "教育",
+      "consulting": "コンサルティング",
+      "media": "メディア・広告",
+      "logistics": "物流・運輸",
+      "construction": "建設・不動産",
+      "government": "公共・行政",
+      "other": "その他"
+    },
+    "occupations": {
+      "engineer": "エンジニア",
+      "designer": "デザイナー",
+      "manager": "マネージャー",
+      "consultant": "コンサルタント",
+      "researcher": "研究者",
+      "sales": "営業",
+      "marketing": "マーケティング",
+      "hr": "人事",
+      "finance": "財務・経理",
+      "student": "学生",
+      "freelancer": "フリーランス",
+      "other": "その他"
+    },
+    "plans": {
+      "free": "無料プラン",
+      "freeDescription": "基本的な通知機能をご利用いただけます",
+      "freePrice": "¥0/月",
+      "premium": "有料プラン",
+      "premiumDescription": "高度な分析機能と優先通知をご利用いただけます",
+      "premiumPrice": "¥980/月"
+    },
+    "footer": {
+      "hasAccount": "既にアカウントをお持ちですか？",
+      "loginLink": "ログイン",
+      "termsAgreement": "登録することで、",
+      "termsAgreementEnd": "に同意したものとします。"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "アカウントとアプリケーションの設定を管理します",
+    "sections": {
+      "notifications": "通知設定",
+      "display": "表示設定",
+      "profile": "登録情報の変更",
+      "deleteAccount": "アカウント削除"
+    },
+    "notifications": {
+      "push": "プッシュ通知",
+      "email": "メール通知"
+    },
+    "display": {
+      "theme": "テーマ",
+      "language": "言語",
+      "themes": {
+        "light": "ライト",
+        "dark": "ダーク",
+        "auto": "自動"
+      },
+      "languages": {
+        "ja": "日本語",
+        "en": "English"
+      }
+    },
+    "preferences": {
+      "aiAvatar": "AIアバター",
+      "avatars": {
+        "dog": "犬",
+        "cat": "猫",
+        "goat": "ヤギ"
+      }
+    },
+    "profile": {
+      "updateProfile": "登録情報を変更する"
+    },
+    "deleteAccount": {
+      "deleteAccount": "アカウントを削除する"
+    },
+    "actions": {
+      "saveSettings": "設定を保存"
+    }
+  },
+  "terms": {
+    "title": "利用規約",
+    "lastUpdated": "最終更新日",
+    "draftNotice": "【未確定版】この文書は開発中のサービスのための暂定版です。",
+    "sections": {
+      "introduction": {
+        "title": "はじめに",
+        "content": "この利用規約（以下「本規約」）は、News for Problem（以下「当サービス」）の利用条件を定めています。当サービスを利用することで、您は本規約に同意したものとみなします。"
+      },
+      "service": {
+        "title": "サービスの内容",
+        "content": "当サービスは、AI技術の最新動向と企業課題をマッチングし、新たなソリューションの可能性をお届けするプラットフォームです。ユーザーは自身の課題を登録し、関連する技術情報の通知を受け取ることができます。"
+      },
+      "account": {
+        "title": "アカウントの管理",
+        "items": {
+          "responsibility": "ユーザーは自分のアカウント情報に対して責任を負います。",
+          "security": "パスワードの適切な管理と第三者への開示禁止。",
+          "accuracy": "登録情報の正確性と最新性を維持すること。"
+        }
+      },
+      "usage": {
+        "title": "利用のルール",
+        "items": {
+          "lawful": "法律、規則、公序良俗に反する行為の禁止。",
+          "noHarm": "他のユーザーや第三者に害を与える行為の禁止。",
+          "noInfringement": "知的財産権の侵害や不正アクセスの禁止。"
+        }
+      },
+      "privacy": {
+        "title": "プライバシーの保護",
+        "content": "当サービスのプライバシーポリシーに基づき、ユーザーの個人情報を適切に保護します。詳細はプライバシーポリシーをご確認ください。"
+      },
+      "limitation": {
+        "title": "責任の制限",
+        "content": "当サービスは「現状有姿」で提供され、完全性、正確性、信頼性についての保証はいたしません。当サービスの利用による損害について、当社は一切の責任を負いません。"
+      },
+      "termination": {
+        "title": "サービスの停止・終了",
+        "content": "当社は、事前の通知なしにサービスの全部または一部を一時的に停止または終了することがあります。また、本規約に違反したユーザーに対してアカウントの停止または削除を行うことがあります。"
+      },
+      "changes": {
+        "title": "規約の変更",
+        "content": "当社は、必要に応じて本規約を変更することがあります。変更後の規約は、ウェブサイト上での公開をもって効力を生じます。継続してサービスを利用される場合は、変更後の規約に同意したものとみなします。"
+      },
+      "contact": {
+        "title": "お問い合わせ",
+        "content": "本規約に関してご不明な点がありましたら、以下の連絡先までお問い合わせください。"
+      }
+    }
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "lastUpdated": "最終更新日",
+    "draftNotice": "【未確定版】この文書は開発中のサービスのための暂定版です。",
+    "sections": {
+      "introduction": {
+        "title": "はじめに",
+        "content": "News for Problem（以下「当サービス」）は、ユーザーのプライバシーを尊重し、個人情報の適切な保護に努めています。本プライバシーポリシーは、当サービスにおいて収集、使用、保管、開示する個人情報について説明します。"
+      },
+      "collection": {
+        "title": "収集する情報",
+        "items": {
+          "personal": "氏名、メールアドレス、生年月日、職業、業界などの個人情報",
+          "usage": "サービスの利用状況、アクセスログ、クリック情報",
+          "technical": "IPアドレス、ブラウザ情報、デバイス情報",
+          "communication": "お問い合わせやサポートに関するやりとりの内容"
+        }
+      },
+      "usage": {
+        "title": "情報の利用目的",
+        "items": {
+          "service": "サービスの提供、維持、改善",
+          "communication": "ユーザーとの連絡、サポートの提供",
+          "improvement": "サービスの品質向上、新機能の開発",
+          "legal": "法的義務の履行、不正利用の防止"
+        }
+      },
+      "sharing": {
+        "title": "情報の第三者提供",
+        "content": "当社は、以下の場合を除き、ユーザーの同意なしに個人情報を第三者に提供することはありません。",
+        "items": {
+          "consent": "ユーザーの同意がある場合",
+          "legal": "法令に基づく強制的な開示が必要な場合",
+          "business": "事業譲渡、合併等に伴う場合"
+        }
+      },
+      "security": {
+        "title": "セキュリティ対策",
+        "content": "当社は、個人情報の不正アクセス、紛失、破壊、改ざん、漏えいなどを防止するため、適切な技術的・組織的安全対策を実施しています。"
+      },
+      "cookies": {
+        "title": "Cookieの使用",
+        "content": "当サービスでは、ユーザーの便利性向上やサービス改善のためにCookieを使用しています。Cookieの使用を望まない場合は、ブラウザの設定で無効化できますが、サービスの一部機能が制限される場合があります。"
+      },
+      "rights": {
+        "title": "ユーザーの権利",
+        "items": {
+          "access": "個人情報の開示請求権",
+          "correction": "個人情報の訂正・追加・削除請求権",
+          "deletion": "個人情報の利用停止・消去請求権",
+          "portability": "個人情報のポータビリティ権"
+        }
+      },
+      "retention": {
+        "title": "情報の保有期間",
+        "content": "個人情報は、利用目的を達成するために必要な期間、または法令で定められた期間保有します。保有期間終了後は、適切な方法で安全に廃棄します。"
+      },
+      "children": {
+        "title": "未成年者の情報",
+        "content": "当サービスは13歳未満のお子様を対象としておらず、13歳未満の方からの個人情報を意図的に収集することはありません。"
+      },
+      "changes": {
+        "title": "ポリシーの変更",
+        "content": "本プライバシーポリシーは必要に応じて変更することがあります。重要な変更の場合は、ユーザーに事前に通知します。"
+      },
+      "contact": {
+        "title": "お問い合わせ",
+        "content": "個人情報の取り扱いに関してご質問やご要望がございましたら、以下の連絡先までお問い合わせください。"
+      }
+    }
+  }
+}

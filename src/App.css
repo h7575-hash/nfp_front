@@ -1,6 +1,23 @@
+:root {
+  --primary-color: #ff6b35;
+  --primary-hover: #e55a30;
+  --accent-color: #ffd700;
+  --accent-hover: #e6c200;
+  --background: #ffffff;
+  --background-secondary: #fff8f5;
+  --border-color: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --secondary-color: #f3f4f6;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --radius: 6px;
+  --radius-lg: 8px;
+}
+
 .App {
   min-height: 100vh;
-  background: #ffffff;
+  background: var(--background);
 }
 
 /* Header Navigation */
@@ -16,7 +33,7 @@
 .nav-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 1rem 0;
   max-width: 1200px;
   margin: 0 auto;
@@ -56,32 +73,7 @@
   font-weight: bold;
 }
 
-.nav-menu {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  gap: 2rem;
-}
-
-.nav-link {
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  transition: all 0.2s ease;
-}
-
-.nav-link:hover {
-  color: var(--primary-color);
-  background-color: var(--secondary-color);
-}
-
-.nav-link.active {
-  color: var(--primary-color);
-  background-color: var(--secondary-color);
-}
+/* 古いナビゲーション要素は削除済み */
 
 /* Main Content Area */
 .main-content {
@@ -99,7 +91,7 @@
 .hero {
   text-align: center;
   padding: 4rem 0;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: white;
   margin-bottom: 3rem;
 }
@@ -127,10 +119,6 @@
   
   .hero p {
     font-size: 1rem;
-  }
-  
-  .nav-menu {
-    display: none;
   }
 }
 
@@ -182,7 +170,7 @@
 .feature-icon {
   width: 3rem;
   height: 3rem;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -190,6 +178,7 @@
   margin: 0 auto 1rem auto;
   color: white;
   font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
 .feature-title {

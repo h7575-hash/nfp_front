@@ -1,37 +1,38 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const ServicePage = () => {
+    const { t } = useTranslation('pages');
+    
     return (
         <div>
             <section className="hero">
                 <div className="container">
-                    <h1>本当に知りたいことだけを<br></br>いつの間にか忘れないように</h1>
-                    <p>
-                        チェックしてほしい情報を教えてください<br></br>
-                        見つけたらお知らせします！
+                    <h1 style={{whiteSpace: 'pre-line'}}>{t('service.hero.title')}</h1>
+                    <p style={{whiteSpace: 'pre-line'}}>
+                        {t('service.hero.subtitle')}
                     </p>
-                    <Link to="/register" className="btn btn-accent">
-                        知りたいことを登録する
+                    <Link to="/register" className="btn btn-accent metallic-gold">
+                        {t('service.hero.cta')}
                     </Link>
                 </div>
             </section>
 
             <section className="container">
                 <div className="page-header">
-                    <h2 className="page-title">サービスの特徴</h2>
+                    <h2 className="page-title">{t('service.features.title')}</h2>
                     <p className="page-subtitle">
-                        最新のAI技術動向と企業課題をマッチングし、新たなソリューションの可能性をお届けします
+                        {t('service.features.subtitle')}
                     </p>
                 </div>
 
                 <div className="features-grid">
                     <div className="feature-card fade-in">
                         <div className="feature-icon">🎯</div>
-                        <h3 className="feature-title">課題特化型マッチング</h3>
+                        <h3 className="feature-title">{t('service.features.matching.title')}</h3>
                         <p className="feature-description">
-                            過去に技術的制約で諦めた具体的な課題を詳細に分析し、
-                            最新のAI技術で解決可能かどうかを評価します。
+                            {t('service.features.matching.description')}
                         </p>
                     </div>
 
@@ -68,8 +69,8 @@ const ServicePage = () => {
                     <p className="text-secondary mb-6">
                         登録は無料です。あなたの課題が最新技術で解決できるかもしれません。
                     </p>
-                    <Link to="/register" className="btn btn-primary">
-                        無料で課題を登録する
+                    <Link to="/register" className="btn btn-accent metallic-gold">
+                        {t('service.cta.button')}
                     </Link>
                 </div>
             </section>

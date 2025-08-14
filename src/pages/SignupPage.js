@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import './SignupPage.css';
 
 const SignupPage = () => {
+    const { t } = useTranslation('pages');
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -10,55 +13,55 @@ const SignupPage = () => {
         industry: '',
         occupation: '',
         birth_date: '',
-        plan: 'free'
+        plan: 'free',
+        agreeToTerms: false
     });
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     // 選択肢データ
     const purposeOptions = [
-        { value: 'private', label: 'プライベート' },
-        { value: 'business', label: 'ビジネス' },
-        { value: 'both', label: '両方' }
+        { value: 'private', label: t('signup.purposes.private') },
+        { value: 'business', label: t('signup.purposes.business') },
+        { value: 'both', label: t('signup.purposes.both') }
     ];
 
     const industryOptions = [
-        { value: 'tech', label: 'IT・テクノロジー' },
-        { value: 'finance', label: '金融・保険' },
-        { value: 'manufacturing', label: '製造業' },
-        { value: 'healthcare', label: '医療・ヘルスケア' },
-        { value: 'retail', label: '小売・EC' },
-        { value: 'education', label: '教育' },
-        { value: 'consulting', label: 'コンサルティング' },
-        { value: 'media', label: 'メディア・広告' },
-        { value: 'logistics', label: '物流・運輸' },
-        { value: 'construction', label: '建設・不動産' },
-        { value: 'government', label: '公共・行政' },
-        { value: 'other', label: 'その他' }
+        { value: 'tech', label: t('signup.industries.tech') },
+        { value: 'finance', label: t('signup.industries.finance') },
+        { value: 'manufacturing', label: t('signup.industries.manufacturing') },
+        { value: 'healthcare', label: t('signup.industries.healthcare') },
+        { value: 'retail', label: t('signup.industries.retail') },
+        { value: 'education', label: t('signup.industries.education') },
+        { value: 'consulting', label: t('signup.industries.consulting') },
+        { value: 'media', label: t('signup.industries.media') },
+        { value: 'logistics', label: t('signup.industries.logistics') },
+        { value: 'construction', label: t('signup.industries.construction') },
+        { value: 'government', label: t('signup.industries.government') },
+        { value: 'other', label: t('signup.industries.other') }
     ];
 
     const occupationOptions = [
-        { value: 'engineer', label: 'エンジニア' },
-        { value: 'designer', label: 'デザイナー' },
-        { value: 'manager', label: 'マネージャー' },
-        { value: 'consultant', label: 'コンサルタント' },
-        { value: 'researcher', label: '研究者' },
-        { value: 'sales', label: '営業' },
-        { value: 'marketing', label: 'マーケティング' },
-        { value: 'hr', label: '人事' },
-        { value: 'finance', label: '財務・経理' },
-        { value: 'student', label: '学生' },
-        { value: 'freelancer', label: 'フリーランス' },
-        { value: 'executive', label: '経営者' },
-        { value: 'other', label: 'その他' }
+        { value: 'engineer', label: t('signup.occupations.engineer') },
+        { value: 'designer', label: t('signup.occupations.designer') },
+        { value: 'manager', label: t('signup.occupations.manager') },
+        { value: 'consultant', label: t('signup.occupations.consultant') },
+        { value: 'researcher', label: t('signup.occupations.researcher') },
+        { value: 'sales', label: t('signup.occupations.sales') },
+        { value: 'marketing', label: t('signup.occupations.marketing') },
+        { value: 'hr', label: t('signup.occupations.hr') },
+        { value: 'finance', label: t('signup.occupations.finance') },
+        { value: 'student', label: t('signup.occupations.student') },
+        { value: 'freelancer', label: t('signup.occupations.freelancer') },
+        { value: 'other', label: t('signup.occupations.other') }
     ];
 
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
         // エラーをクリア
         if (errors[name]) {
@@ -73,36 +76,41 @@ const SignupPage = () => {
         const newErrors = {};
 
         // 必須項目チェック
-        if (!formData.email) newErrors.email = 'メールアドレスは必須です';
-        if (!formData.password) newErrors.password = 'パスワードは必須です';
-        if (!formData.confirmPassword) newErrors.confirmPassword = 'パスワード確認は必須です';
-        if (!formData.purpose) newErrors.purpose = '利用目的を選択してください';
-        if (!formData.industry) newErrors.industry = '業種を選択してください';
-        if (!formData.occupation) newErrors.occupation = '職種を選択してください';
-        if (!formData.birth_date) newErrors.birth_date = '生年月日を入力してください';
+        if (!formData.email) newErrors.email = t('signup.validation.emailRequired');
+        if (!formData.password) newErrors.password = t('signup.validation.passwordRequired');
+        if (!formData.confirmPassword) newErrors.confirmPassword = t('signup.validation.confirmPasswordRequired');
+        if (!formData.purpose) newErrors.purpose = t('signup.validation.purposeRequired');
+        if (!formData.industry) newErrors.industry = t('signup.validation.industryRequired');
+        if (!formData.occupation) newErrors.occupation = t('signup.validation.occupationRequired');
+        if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
         if (formData.birth_date) {
             const birthDate = new Date(formData.birth_date);
             const today = new Date();
             
             if (birthDate > today) {
-                newErrors.birth_date = '未来の日付は入力できません';
+                newErrors.birth_date = t('signup.validation.futureDateNotAllowed');
             }
         }
 
         // パスワード一致チェック
         if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'パスワードが一致しません';
+            newErrors.confirmPassword = t('signup.validation.passwordMismatch');
         }
 
         // パスワード長チェック
         if (formData.password && formData.password.length < 8) {
-            newErrors.password = 'パスワードは8文字以上で入力してください';
+            newErrors.password = t('signup.validation.passwordMinLength');
         }
 
         // メールフォーマットチェック
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (formData.email && !emailRegex.test(formData.email)) {
-            newErrors.email = '有効なメールアドレスを入力してください';
+            newErrors.email = t('signup.validation.invalidEmail');
+        }
+
+        // 利用規約同意チェック
+        if (!formData.agreeToTerms) {
+            newErrors.agreeToTerms = t('signup.validation.termsRequired');
         }
 
         setErrors(newErrors);
@@ -143,7 +151,7 @@ const SignupPage = () => {
             console.log('Response data:', result);
             
             if (response.ok && result.success) {
-                alert('登録が完了しました！');
+                alert(t('signup.success.registered'));
                 // 成功時の処理（ログインページへリダイレクトなど）
                 // window.location.href = '/login';
             } else {
@@ -152,7 +160,7 @@ const SignupPage = () => {
             
         } catch (error) {
             console.error('登録エラー:', error);
-            alert(`登録に失敗しました: ${error.message}`);
+            alert(`${t('signup.errors.registrationFailed')}: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -162,21 +170,21 @@ const SignupPage = () => {
         <div className="signup-container">
             <div className="signup-card">
                 <div className="signup-header">
-                    <h1>新規登録</h1>
-                    <p>News dogアカウントを作成して、最新の技術情報を受け取りましょう</p>
+                    <h1>{t('signup.title')}</h1>
+                    <p>{t('signup.subtitle')}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="signup-form">
                     {/* メールアドレス */}
                     <div className="form-group">
-                        <label htmlFor="email">メールアドレス *</label>
+                        <label htmlFor="email">{t('signup.form.email')} *</label>
                         <input
                             type="email"
                             id="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="your@email.com"
+                            placeholder={t('signup.form.emailPlaceholder')}
                             className={`form-input ${errors.email ? 'error' : ''}`}
                         />
                         {errors.email && <span className="error-message">{errors.email}</span>}
@@ -185,27 +193,27 @@ const SignupPage = () => {
                     {/* パスワード */}
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="password">パスワード *</label>
+                            <label htmlFor="password">{t('signup.form.password')} *</label>
                             <input
                                 type="password"
                                 id="password"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                placeholder="8文字以上"
+                                placeholder={t('signup.form.passwordPlaceholder')}
                                 className={`form-input ${errors.password ? 'error' : ''}`}
                             />
                             {errors.password && <span className="error-message">{errors.password}</span>}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="confirmPassword">パスワード確認 *</label>
+                            <label htmlFor="confirmPassword">{t('signup.form.confirmPassword')} *</label>
                             <input
                                 type="password"
                                 id="confirmPassword"
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                placeholder="パスワードを再入力"
+                                placeholder={t('signup.form.confirmPasswordPlaceholder')}
                                 className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                             />
                             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
@@ -214,7 +222,7 @@ const SignupPage = () => {
 
                     {/* 利用目的 */}
                     <div className="form-group">
-                        <label htmlFor="purpose">利用目的 *</label>
+                        <label htmlFor="purpose">{t('signup.form.purpose')} *</label>
                         <select
                             id="purpose"
                             name="purpose"
@@ -222,7 +230,7 @@ const SignupPage = () => {
                             onChange={handleChange}
                             className={`form-input ${errors.purpose ? 'error' : ''}`}
                         >
-                            <option value="">選択してください</option>
+                            <option value="">{t('signup.form.selectPlaceholder')}</option>
                             {purposeOptions.map(option => (
                                 <option key={option.value} value={option.value}>
                                     {option.label}
@@ -235,7 +243,7 @@ const SignupPage = () => {
                     {/* 業種・職種 */}
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="industry">業種 *</label>
+                            <label htmlFor="industry">{t('signup.form.industry')} *</label>
                             <select
                                 id="industry"
                                 name="industry"
@@ -243,7 +251,7 @@ const SignupPage = () => {
                                 onChange={handleChange}
                                 className={`form-input ${errors.industry ? 'error' : ''}`}
                             >
-                                <option value="">選択してください</option>
+                                <option value="">{t('signup.form.selectPlaceholder')}</option>
                                 {industryOptions.map(option => (
                                     <option key={option.value} value={option.value}>
                                         {option.label}
@@ -253,7 +261,7 @@ const SignupPage = () => {
                             {errors.industry && <span className="error-message">{errors.industry}</span>}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="occupation">職種 *</label>
+                            <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
                             <select
                                 id="occupation"
                                 name="occupation"
@@ -261,7 +269,7 @@ const SignupPage = () => {
                                 onChange={handleChange}
                                 className={`form-input ${errors.occupation ? 'error' : ''}`}
                             >
-                                <option value="">選択してください</option>
+                                <option value="">{t('signup.form.selectPlaceholder')}</option>
                                 {occupationOptions.map(option => (
                                     <option key={option.value} value={option.value}>
                                         {option.label}
@@ -274,7 +282,7 @@ const SignupPage = () => {
 
                     {/* 生年月日 */}
                     <div className="form-group">
-                        <label htmlFor="birth_date">生年月日 *</label>
+                        <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
                         <input
                             type="date"
                             id="birth_date"
@@ -290,7 +298,7 @@ const SignupPage = () => {
 
                     {/* プラン選択 */}
                     <div className="form-group">
-                        <label>プラン選択</label>
+                        <label>{t('signup.form.plan')}</label>
                         <div className="plan-options">
                             <label className="plan-option">
                                 <input
@@ -301,9 +309,9 @@ const SignupPage = () => {
                                     onChange={handleChange}
                                 />
                                 <div className="plan-card">
-                                    <h3>無料プラン</h3>
-                                    <p>基本的な通知機能をご利用いただけます</p>
-                                    <div className="price">¥0/月</div>
+                                    <h3>{t('signup.plans.free')}</h3>
+                                    <p>{t('signup.plans.freeDescription')}</p>
+                                    <div className="price">{t('signup.plans.freePrice')}</div>
                                 </div>
                             </label>
                             <label className="plan-option">
@@ -315,12 +323,37 @@ const SignupPage = () => {
                                     onChange={handleChange}
                                 />
                                 <div className="plan-card">
-                                    <h3>有料プラン</h3>
-                                    <p>高度な分析機能と優先通知をご利用いただけます</p>
-                                    <div className="price">¥980/月</div>
+                                    <h3>{t('signup.plans.premium')}</h3>
+                                    <p>{t('signup.plans.premiumDescription')}</p>
+                                    <div className="price">{t('signup.plans.premiumPrice')}</div>
                                 </div>
                             </label>
                         </div>
+                    </div>
+
+                    {/* 利用規約同意 */}
+                    <div className="form-group">
+                        <label className="checkbox-label">
+                            <input
+                                type="checkbox"
+                                name="agreeToTerms"
+                                checked={formData.agreeToTerms}
+                                onChange={handleChange}
+                                className={errors.agreeToTerms ? 'error' : ''}
+                            />
+                            <span className="checkmark"></span>
+                            <span className="checkbox-text">
+                                {t('signup.form.termsAgree')}
+                                <a href="/terms" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                    {t('signup.form.termsLink')}
+                                </a>
+                                {t('signup.form.and')}
+                                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                    {t('signup.form.privacyLink')}
+                                </a>
+                            </span>
+                        </label>
+                        {errors.agreeToTerms && <span className="error-message">{errors.agreeToTerms}</span>}
                     </div>
 
                     <button 
@@ -331,27 +364,20 @@ const SignupPage = () => {
                         {isLoading ? (
                             <>
                                 <div className="spinner"></div>
-                                登録中...
+                                {t('signup.form.submitting')}
                             </>
                         ) : (
-                            'アカウントを作成'
+                            t('signup.form.submit')
                         )}
                     </button>
                 </form>
 
                 <div className="signup-footer">
                     <p>
-                        すでにアカウントをお持ちですか？ 
+                        {t('signup.footer.hasAccount')}
                         <Link to="/login" className="login-link">
-                            ログイン
+                            {t('signup.footer.loginLink')}
                         </Link>
-                    </p>
-                    <p className="terms-text">
-                        登録することで、
-                        <Link to="/terms" className="terms-link">利用規約</Link>
-                        および
-                        <Link to="/privacy" className="terms-link">プライバシーポリシー</Link>
-                        に同意したものとします。
                     </p>
                 </div>
             </div>

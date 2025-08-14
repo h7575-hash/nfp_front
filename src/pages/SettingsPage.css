@@ -1,0 +1,351 @@
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.settings-section {
+    background: var(--background, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius-lg, 8px);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+}
+
+.settings-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary, #111827);
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.settings-item {
+    margin-bottom: 1.5rem;
+}
+
+.settings-item:last-child {
+    margin-bottom: 0;
+}
+
+.settings-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    color: var(--text-primary, #111827);
+    cursor: pointer;
+    gap: 1rem;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.settings-label span {
+    flex-shrink: 0;
+}
+
+.settings-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color, #3b82f6);
+}
+
+.settings-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius, 6px);
+    background: var(--background, #ffffff);
+    color: var(--text-primary, #111827);
+    font-size: 1rem;
+    width: 45%;
+    max-width: 200px;
+    min-width: 140px;
+}
+
+.settings-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #ff6b35);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.settings-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius, 6px);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.settings-button.primary {
+    background: var(--primary-color, #3b82f6);
+    color: white;
+}
+
+.settings-button.primary:hover {
+    background: var(--primary-hover, #2563eb);
+}
+
+.settings-button.secondary {
+    background: var(--secondary-color, #f3f4f6);
+    color: var(--text-primary, #111827);
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.settings-button.secondary:hover {
+    background: var(--border-color, #e5e7eb);
+}
+
+.settings-button.danger {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.settings-button.danger:hover {
+    background: #fecaca;
+    color: #b91c1c;
+}
+
+.settings-actions {
+    text-align: center;
+    padding-top: 1rem;
+}
+
+/* プロフィール更新フォーム */
+.profile-form-container {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius, 6px);
+    background: var(--secondary-color, #f9fafb);
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary, #111827);
+}
+
+.form-input {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius, 6px);
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #ff6b35);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.form-input.error {
+    border-color: #dc2626;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.plan-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.plan-option {
+    cursor: pointer;
+}
+
+.plan-option input[type="radio"] {
+    display: none;
+}
+
+.plan-card {
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius, 6px);
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.plan-option input[type="radio"]:checked + .plan-card {
+    border-color: var(--accent-color, #ffd700);
+    background: var(--accent-light, #fff8cc);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
+}
+
+.plan-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary, #111827);
+    font-size: 1rem;
+}
+
+.plan-card p {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-secondary, #6b7280);
+    font-size: 0.875rem;
+}
+
+.price {
+    font-weight: bold;
+    color: var(--primary-color, #ff6b35);
+    font-size: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+/* プラン変更フォーム */
+.plan-form-container {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--radius, 6px);
+    background: var(--secondary-color, #f9fafb);
+}
+
+.current-plan-info {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--background, #ffffff);
+    border-radius: var(--radius, 6px);
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.current-plan-info p {
+    margin: 0;
+    color: var(--text-primary, #111827);
+}
+
+.plan-selection h3 {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-primary, #111827);
+    font-size: 1.125rem;
+}
+
+/* アカウント削除フォーム */
+.delete-form-container {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    border: 2px solid #fecaca;
+    border-radius: var(--radius, 6px);
+    background: #fef2f2;
+}
+
+.delete-warning {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: var(--radius, 6px);
+    border: 1px solid #fca5a5;
+}
+
+.delete-warning h3 {
+    margin: 0 0 1rem 0;
+    color: #dc2626;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.delete-warning p {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-primary, #111827);
+}
+
+.delete-warning ul {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
+
+.delete-warning li {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary, #111827);
+}
+
+.warning-text {
+    font-weight: 600;
+    color: #dc2626 !important;
+    margin-top: 1rem !important;
+}
+
+.delete-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .settings-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .settings-label {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .settings-label span {
+        white-space: nowrap;
+    }
+    
+    .settings-select {
+        width: 100%;
+    }
+    
+    .settings-button {
+        width: 100%;
+        margin-right: 0;
+    }
+    
+    .profile-form-container {
+        padding: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .plan-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}

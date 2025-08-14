@@ -10,50 +10,51 @@ import HomePage from './pages/HomePage';
 import ServicePage from './pages/ServicePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import SettingsPage from './pages/SettingsPage';
+import Sidebar from './components/Sidebar';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 
 function App() {
     return (
-        <Router>
-            <div className="App">
-                <header className="app-header">
-                    <div className="nav-container">
-                        <Link to="/" className="logo">
-                            <img src="/images/logo.png" alt="News dog" className="logo-image" />
-                            <span>News dog</span>
-                        </Link>
-                        <nav>
-                            <ul className="nav-menu">
-                                <li>
-                                    <Link to="/" className="nav-link">ホーム</Link>
-                                </li>
-                                <li>
-                                    <Link to="/service" className="nav-link">サービス</Link>
-                                </li>
-                                <li>
-                                    <Link to="/register" className="nav-link">課題登録</Link>
-                                </li>
-                                <li>
-                                    <Link to="/login" className="nav-link">ログイン</Link>
-                                </li>
-                                <li>
-                                    <Link to="/signup" className="nav-link">新規登録</Link>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </header>
-                <main className="main-content">
-                    <Routes>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/service" element={<ServicePage />} />
-                        <Route path="/register" element={<RequestPage />} />
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/signup" element={<SignupPage />} />
-                    </Routes>
-                </main>
-            </div>
-        </Router>
+        <AuthProvider>
+            <Router>
+                <div className="App">
+                    <Sidebar />
+                    <header className="app-header">
+                        <div className="nav-container">
+                            <Link to="/" className="logo">
+                                <img src="/images/logo.png" alt="News dog" className="logo-image" />
+                                <span>News dog</span>
+                            </Link>
+                        </div>
+                    </header>
+                    <main className="main-content">
+                        <Routes>
+                            <Route path="/" element={
+                                <ProtectedRoute>
+                                    <HomePage />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/service" element={<ServicePage />} />
+                            <Route path="/register" element={
+                                <ProtectedRoute>
+                                    <RequestPage />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/signup" element={<SignupPage />} />
+                            <Route path="/settings" element={
+                                <ProtectedRoute>
+                                    <SettingsPage />
+                                </ProtectedRoute>
+                            } />
+                        </Routes>
+                    </main>
+                </div>
+            </Router>
+        </AuthProvider>
     );
 }
 
