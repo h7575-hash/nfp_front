@@ -74,22 +74,59 @@ const SignupPage = () => {
 
     // Google OAuth処理
     const handleGoogleSignup = async () => {
+        console.log('=== Google OAuth 開始 ===');
+        console.log('Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+        console.log('Current URL:', window.location.href);
+        console.log('Domain:', window.location.hostname);
+
         if (!window.google) {
+            console.error('Google Sign-In API が読み込まれていません');
             alert('Google Sign-In APIが読み込まれていません。');
             return;
         }
 
+        console.log('Google API loaded:', {
+            google: !!window.google,
+            accounts: !!window.google.accounts,
+            oauth2: !!window.google.accounts.oauth2,
+            initTokenClient: !!window.google.accounts.oauth2.initTokenClient
+        });
+
         try {
             // Google Identity Services (GIS) を使用
+            console.log('TokenClient 初期化開始...');
             const client = window.google.accounts.oauth2.initTokenClient({
                 client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
                 callback: async (response) => {
+                    console.log('=== OAuth Callback 開始 ===');
+                    console.log('Response received:', response);
+                    
+                    if (response.error) {
+                        console.error('OAuth Response Error:', response.error);
+                        console.error('Error description:', response.error_description);
+                        alert(`OAuth認証エラー: ${response.error} - ${response.error_description || ''}`);
+                        return;
+                    }
+
                     if (response.access_token) {
+                        console.log('Access token received, length:', response.access_token.length);
                         try {
                             // Googleユーザー情報を取得
+                            console.log('ユーザー情報取得開始...');
                             const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${response.access_token}`);
+                            console.log('User info response status:', userInfoResponse.status);
+                            
+                            if (!userInfoResponse.ok) {
+                                throw new Error(`User info API failed: ${userInfoResponse.status} ${userInfoResponse.statusText}`);
+                            }
+                            
                             const userInfo = await userInfoResponse.json();
+                            console.log('User info received:', { 
+                                email: userInfo.email, 
+                                name: userInfo.name, 
+                                verified_email: userInfo.verified_email 
+                            });
 
                             if (userInfo.email) {
                                 setGoogleUserInfo({
@@ -97,27 +134,49 @@ const SignupPage = () => {
                                     access_token: response.access_token
                                 });
                                 setShowGoogleForm(true);
+                                console.log('=== Google OAuth 成功 ===');
                             } else {
-                                throw new Error('ユーザー情報の取得に失敗しました');
+                                throw new Error('メールアドレスが取得できませんでした');
                             }
                         } catch (error) {
                             console.error('ユーザー情報取得エラー:', error);
-                            alert('ユーザー情報の取得に失敗しました。');
+                            console.error('Error stack:', error.stack);
+                            alert(`ユーザー情報の取得に失敗しました: ${error.message}`);
                         }
+                    } else {
+                        console.error('Access token not received in response:', response);
+                        alert('アクセストークンが取得できませんでした。');
                     }
                 },
                 error_callback: (error) => {
-                    console.error('Google OAuth エラー:', error);
-                    alert('Google認証に失敗しました。');
+                    console.error('=== Google OAuth Error Callback ===');
+                    console.error('Error object:', error);
+                    console.error('Error type:', typeof error);
+                    console.error('Error properties:', Object.keys(error || {}));
+                    if (error) {
+                        console.error('Error message:', error.message);
+                        console.error('Error code:', error.code);
+                        console.error('Error details:', error.details);
+                    }
+                    alert(`Google認証に失敗しました: ${error?.message || JSON.stringify(error)}`);
                 }
             });
 
+            console.log('TokenClient created:', !!client);
+            console.log('TokenClient methods:', Object.keys(client || {}));
+
             // OAuth認証開始
+            console.log('requestAccessToken 呼び出し開始...');
             client.requestAccessToken();
+            console.log('requestAccessToken 呼び出し完了');
 
         } catch (error) {
-            console.error('Google認証エラー:', error);
-            alert('Google認証に失敗しました。もう一度お試しください。');
+            console.error('=== Google OAuth 初期化エラー ===');
+            console.error('Error:', error);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            console.error('Error name:', error.name);
+            alert(`Google認証の初期化に失敗しました: ${error.message}`);
         }
     };
 
