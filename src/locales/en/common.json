@@ -1,7 +1,6 @@
 {
   "navigation": {
     "home": "Home",
-    "service": "Service",
     "register": "Register Issue",
     "login": "Login",
     "signup": "Sign Up",

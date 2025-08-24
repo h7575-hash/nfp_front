@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 import RequestPage from './pages/RequestPage';
 import HomePage from './pages/HomePage';
-import ServicePage from './pages/ServicePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import SettingsPage from './pages/SettingsPage';
@@ -37,7 +36,6 @@ function App() {
                                     <HomePage />
                                 </ProtectedRoute>
                             } />
-                            <Route path="/service" element={<ServicePage />} />
                             <Route path="/register" element={
                                 <ProtectedRoute>
                                     <RequestPage />

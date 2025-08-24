@@ -54,14 +54,6 @@ function Sidebar() {
                 
                 <div className="sidebar-menu">
                     <div className="sidebar-main-links">
-                        <Link 
-                            to="/service" 
-                            className={`sidebar-link ${isActive('/service') ? 'active' : ''}`}
-                            onClick={closeSidebar}
-                        >
-                            <span className="sidebar-link-icon">⚙️</span>
-                            <span>{t('navigation.service')}</span>
-                        </Link>
                         
                         {(isAuthenticated || isDevelopment) ? (
                             <>

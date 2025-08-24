@@ -18,6 +18,186 @@ const SignupPage = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [showGoogleForm, setShowGoogleForm] = useState(false);
+    const [googleUserInfo, setGoogleUserInfo] = useState(null);
+
+    // デバイスフィンガープリントを生成する関数
+    const generateDeviceFingerprint = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Device fingerprint', 2, 2);
+        const canvasFingerprint = canvas.toDataURL();
+
+        const fingerprint = [
+            navigator.userAgent,
+            navigator.language,
+            window.screen.width + 'x' + window.screen.height,
+            window.screen.colorDepth,
+            new Date().getTimezoneOffset(),
+            navigator.platform,
+            navigator.cookieEnabled,
+            canvasFingerprint
+        ].join('|');
+
+        // ハッシュ化して短縮
+        let hash = 0;
+        for (let i = 0; i < fingerprint.length; i++) {
+            const char = fingerprint.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return 'fp_' + Math.abs(hash).toString(36);
+    };
+
+    // デバイスIDとIPアドレスを取得する関数
+    const getDeviceInfo = async () => {
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            // より永続的なデバイスフィンガープリントを生成
+            deviceId = generateDeviceFingerprint();
+            localStorage.setItem('deviceId', deviceId);
+        }
+
+        let ipAddress = '';
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            ipAddress = data.ip;
+        } catch (error) {
+            console.warn('IP address取得に失敗:', error);
+        }
+
+        return { deviceId, ipAddress };
+    };
+
+    // Google OAuth処理
+    const handleGoogleSignup = async () => {
+        if (!window.google) {
+            alert('Google Sign-In APIが読み込まれていません。');
+            return;
+        }
+
+        try {
+            // Google Identity Services (GIS) を使用
+            const client = window.google.accounts.oauth2.initTokenClient({
+                client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+                callback: async (response) => {
+                    if (response.access_token) {
+                        try {
+                            // Googleユーザー情報を取得
+                            const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${response.access_token}`);
+                            const userInfo = await userInfoResponse.json();
+
+                            if (userInfo.email) {
+                                setGoogleUserInfo({
+                                    ...userInfo,
+                                    access_token: response.access_token
+                                });
+                                setShowGoogleForm(true);
+                            } else {
+                                throw new Error('ユーザー情報の取得に失敗しました');
+                            }
+                        } catch (error) {
+                            console.error('ユーザー情報取得エラー:', error);
+                            alert('ユーザー情報の取得に失敗しました。');
+                        }
+                    }
+                },
+                error_callback: (error) => {
+                    console.error('Google OAuth エラー:', error);
+                    alert('Google認証に失敗しました。');
+                }
+            });
+
+            // OAuth認証開始
+            client.requestAccessToken();
+
+        } catch (error) {
+            console.error('Google認証エラー:', error);
+            alert('Google認証に失敗しました。もう一度お試しください。');
+        }
+    };
+
+    // Google OAuth登録処理
+    const handleGoogleFormSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateGoogleForm()) {
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            // デバイス情報を取得
+            const { deviceId, ipAddress } = await getDeviceInfo();
+
+            // Google OAuth ユーザー登録API呼び出し
+            const response = await fetch('/api/users/oauth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    access_token: googleUserInfo.access_token,
+                    purpose: formData.purpose,
+                    industry: formData.industry,
+                    occupation: formData.occupation,
+                    birth_date: formData.birth_date,
+                    plan: formData.plan,
+                    device_id: deviceId,
+                    ip_address: ipAddress
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(`${t('signup.success.registered')} (${googleUserInfo.email})`);
+                // 成功時の処理
+                // window.location.href = '/login';
+            } else {
+                throw new Error(result.error || `Registration failed (Status: ${response.status})`);
+            }
+
+        } catch (error) {
+            console.error('Google登録エラー:', error);
+            alert(`${t('signup.errors.registrationFailed')}: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Google OAuth用のフォームバリデーション
+    const validateGoogleForm = () => {
+        const newErrors = {};
+
+        // Google OAuth必須項目チェック
+        if (!formData.purpose) newErrors.purpose = t('signup.validation.purposeRequired');
+        if (!formData.industry) newErrors.industry = t('signup.validation.industryRequired');
+        if (!formData.occupation) newErrors.occupation = t('signup.validation.occupationRequired');
+        if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
+        
+        if (formData.birth_date) {
+            const birthDate = new Date(formData.birth_date);
+            const today = new Date();
+            
+            if (birthDate > today) {
+                newErrors.birth_date = t('signup.validation.futureDateNotAllowed');
+            }
+        }
+
+        // 利用規約同意チェック
+        if (!formData.agreeToTerms) {
+            newErrors.agreeToTerms = t('signup.validation.termsRequired');
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     // 選択肢データ
     const purposeOptions = [
@@ -129,6 +309,9 @@ const SignupPage = () => {
         try {
             console.log('ユーザー登録処理:', formData);
             
+            // デバイス情報を取得
+            const { deviceId, ipAddress } = await getDeviceInfo();
+            
             // プロキシ経由でAPIリクエスト送信
             const response = await fetch('/api/users', {
                 method: 'POST',
@@ -142,7 +325,9 @@ const SignupPage = () => {
                     industry: formData.industry,
                     occupation: formData.occupation,
                     birth_date: formData.birth_date,
-                    plan: formData.plan
+                    plan: formData.plan,
+                    device_id: deviceId,
+                    ip_address: ipAddress
                 })
             });
             
@@ -174,7 +359,174 @@ const SignupPage = () => {
                     <p>{t('signup.subtitle')}</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="signup-form">
+                {showGoogleForm ? (
+                    // Google OAuth登録フォーム
+                    <div className="google-signup-form">
+                        <div className="google-user-info">
+                            <img src={googleUserInfo.picture} alt="Profile" className="google-avatar" />
+                            <h3>{googleUserInfo.name}</h3>
+                            <p>{googleUserInfo.email}</p>
+                            <button type="button" onClick={() => setShowGoogleForm(false)} className="btn-back">
+                                {t('signup.form.backToNormal')}
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleGoogleFormSubmit} className="signup-form">
+                            {/* 利用目的 */}
+                            <div className="form-group">
+                                <label htmlFor="purpose">{t('signup.form.purpose')} *</label>
+                                <select
+                                    id="purpose"
+                                    name="purpose"
+                                    value={formData.purpose}
+                                    onChange={handleChange}
+                                    className={`form-input ${errors.purpose ? 'error' : ''}`}
+                                >
+                                    <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                    {purposeOptions.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.purpose && <span className="error-message">{errors.purpose}</span>}
+                            </div>
+
+                            {/* 業種・職種 */}
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="industry">{t('signup.form.industry')} *</label>
+                                    <select
+                                        id="industry"
+                                        name="industry"
+                                        value={formData.industry}
+                                        onChange={handleChange}
+                                        className={`form-input ${errors.industry ? 'error' : ''}`}
+                                    >
+                                        <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                        {industryOptions.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.industry && <span className="error-message">{errors.industry}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
+                                    <select
+                                        id="occupation"
+                                        name="occupation"
+                                        value={formData.occupation}
+                                        onChange={handleChange}
+                                        className={`form-input ${errors.occupation ? 'error' : ''}`}
+                                    >
+                                        <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                        {occupationOptions.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.occupation && <span className="error-message">{errors.occupation}</span>}
+                                </div>
+                            </div>
+
+                            {/* 生年月日 */}
+                            <div className="form-group">
+                                <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
+                                <input
+                                    type="date"
+                                    id="birth_date"
+                                    name="birth_date"
+                                    value={formData.birth_date}
+                                    onChange={handleChange}
+                                    defaultValue="2020-01-01"
+                                    max={new Date().toISOString().split('T')[0]}
+                                    className={`form-input ${errors.birth_date ? 'error' : ''}`}
+                                />
+                                {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
+                            </div>
+
+                            {/* プラン選択 */}
+                            <div className="form-group">
+                                <label>{t('signup.form.plan')}</label>
+                                <div className="plan-options">
+                                    <label className="plan-option">
+                                        <input
+                                            type="radio"
+                                            name="plan"
+                                            value="free"
+                                            checked={formData.plan === 'free'}
+                                            onChange={handleChange}
+                                        />
+                                        <div className="plan-card">
+                                            <h3>{t('signup.plans.free')}</h3>
+                                            <p>{t('signup.plans.freeDescription')}</p>
+                                            <div className="price">{t('signup.plans.freePrice')}</div>
+                                        </div>
+                                    </label>
+                                    <label className="plan-option">
+                                        <input
+                                            type="radio"
+                                            name="plan"
+                                            value="premium"
+                                            checked={formData.plan === 'premium'}
+                                            onChange={handleChange}
+                                        />
+                                        <div className="plan-card">
+                                            <h3>{t('signup.plans.premium')}</h3>
+                                            <p>{t('signup.plans.premiumDescription')}</p>
+                                            <div className="price">{t('signup.plans.premiumPrice')}</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* 利用規約同意 */}
+                            <div className="form-group">
+                                <label className="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        name="agreeToTerms"
+                                        checked={formData.agreeToTerms}
+                                        onChange={handleChange}
+                                        className={errors.agreeToTerms ? 'error' : ''}
+                                    />
+                                    <span className="checkmark"></span>
+                                    <span className="checkbox-text">
+                                        {t('signup.form.termsAgree')}
+                                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                            {t('signup.form.termsLink')}
+                                        </a>
+                                        {t('signup.form.and')}
+                                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                            {t('signup.form.privacyLink')}
+                                        </a>
+                                    </span>
+                                </label>
+                                {errors.agreeToTerms && <span className="error-message">{errors.agreeToTerms}</span>}
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                className={`btn btn-primary signup-btn ${isLoading ? 'loading' : ''}`}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <div className="spinner"></div>
+                                        {t('signup.form.submitting')}
+                                    </>
+                                ) : (
+                                    `${t('signup.form.submit')} (Google)`
+                                )}
+                            </button>
+                        </form>
+                    </div>
+                ) : (
+                    // 通常の登録フォーム
+                    <form onSubmit={handleSubmit} className="signup-form">
                     {/* メールアドレス */}
                     <div className="form-group">
                         <label htmlFor="email">{t('signup.form.email')} *</label>
@@ -370,7 +722,27 @@ const SignupPage = () => {
                             t('signup.form.submit')
                         )}
                     </button>
+
+                    <div className="signup-divider">
+                        <span>{t('signup.form.or')}</span>
+                    </div>
+
+                    <button 
+                        type="button" 
+                        className={`btn btn-google google-signin-btn ${isLoading ? 'loading' : ''}`}
+                        onClick={handleGoogleSignup}
+                        disabled={isLoading}
+                    >
+                        <svg className="google-icon" width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        {t('signup.form.googleSignup')}
+                    </button>
                 </form>
+                )}
 
                 <div className="signup-footer">
                     <p>

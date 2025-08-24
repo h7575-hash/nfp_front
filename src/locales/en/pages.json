@@ -31,44 +31,7 @@
         "title": "Registered Issues",
         "description": "Check the status and progress of issues you have registered so far.",
         "button": "View Issue List"
-      },
-      "service": {
-        "title": "Service Overview",
-        "description": "Learn more about News dog's features and characteristics.",
-        "button": "View Service Introduction"
       }
-    }
-  },
-  "service": {
-    "hero": {
-      "title": "Only what you really want to know\nSo you don't forget without realizing it",
-      "subtitle": "Tell us what information you want us to check\nWe'll let you know when we find it!",
-      "cta": "Register what you want to know"
-    },
-    "features": {
-      "title": "Service Features",
-      "subtitle": "We match the latest AI technology trends with corporate challenges and deliver new solution possibilities",
-      "matching": {
-        "title": "Challenge-Specific Matching",
-        "description": "We analyze specific challenges you gave up on due to technical constraints in the past and evaluate whether they can be solved with the latest AI technology."
-      },
-      "monitoring": {
-        "title": "Real-time Technology Monitoring",
-        "description": "We constantly monitor major AI research institutions, academic papers, and open source projects to catch up with the latest technology trends."
-      },
-      "evaluation": {
-        "title": "AI-powered Solvability Assessment",
-        "description": "We leverage large language models to automatically evaluate the possibility that collected technical information can solve your challenges."
-      },
-      "notification": {
-        "title": "Timely Notifications",
-        "description": "When we find technology with high solvability potential, we'll notify you by email with detailed analysis results and related resources."
-      }
-    },
-    "cta": {
-      "title": "Why not register your challenge first?",
-      "subtitle": "Registration is free. Your challenge might be solved with the latest technology.",
-      "button": "Register your challenge for free"
     }
   },
   "register": {
@@ -125,7 +88,10 @@
       "termsLink": "Terms of Service",
       "privacyLink": "Privacy Policy",
       "selectPlaceholder": "Please select",
-      "and": " and "
+      "and": " and ",
+      "or": "or",
+      "googleSignup": "Sign up with Google",
+      "backToNormal": "Back to normal registration"
     },
     "purposes": {
       "private": "Private",

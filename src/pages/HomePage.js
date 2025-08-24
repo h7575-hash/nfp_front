@@ -94,16 +94,6 @@ const HomePage = () => {
                         </Link>
                     </div>
 
-                    <div className="feature-card">
-                        <div className="feature-icon">ℹ️</div>
-                        <h3 className="feature-title">{t('home.actions.service.title')}</h3>
-                        <p className="feature-description">
-                            {t('home.actions.service.description')}
-                        </p>
-                        <Link to="/service" className="btn btn-secondary">
-                            {t('home.actions.service.button')}
-                        </Link>
-                    </div>
                 </div>
             </section>
         </div>
