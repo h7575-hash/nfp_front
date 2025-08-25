@@ -179,7 +179,7 @@ app.post('/auth/google', async (req, res) => {
         });
         
         // バックエンドAPIに認証付きでリクエスト送信
-        const backendUrl = `${BACKEND_URL}/oauth/google`;
+        const backendUrl = `${BACKEND_URL}/users/oauth/google`;
         console.log('Calling backend API:', backendUrl);
         
         const client = await auth.getIdTokenClient(BACKEND_URL);
