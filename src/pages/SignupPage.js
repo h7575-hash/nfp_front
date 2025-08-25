@@ -26,7 +26,7 @@ const SignupPage = () => {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                const response = await fetch('/api/config');
+                const response = await fetch('/config');
                 const config = await response.json();
                 console.log('Config loaded:', config);
                 setGoogleClientId(config.GOOGLE_CLIENT_ID || '');
@@ -218,7 +218,7 @@ const SignupPage = () => {
             const { deviceId, ipAddress } = await getDeviceInfo();
 
             // サーバーサイドGoogle OAuth登録API呼び出し
-            const response = await fetch('/api/auth/google', {
+            const response = await fetch('/auth/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

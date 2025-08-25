@@ -17,6 +17,15 @@ const auth = new GoogleAuth({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'build')));
 
+// Configuration endpoint for client-side
+app.get('/config', (req, res) => {
+    const config = {
+        GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || ''
+    };
+    
+    res.json(config);
+});
+
 // API proxy middleware - handle all /api/* requests
 app.all('/api/*', async (req, res) => {
     try {
@@ -136,17 +145,9 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
 
-// Configuration endpoint for client-side
-app.get('/api/config', (req, res) => {
-    const config = {
-        GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || ''
-    };
-    
-    res.json(config);
-});
 
 // Google OAuth registration endpoint
-app.post('/api/auth/google', async (req, res) => {
+app.post('/auth/google', async (req, res) => {
     try {
         console.log('=== Google OAuth Server-side Process ===');
         console.log('Request body:', req.body);
