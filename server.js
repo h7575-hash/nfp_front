@@ -136,6 +136,104 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
 
+// Configuration endpoint for client-side
+app.get('/api/config', (req, res) => {
+    const config = {
+        GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || ''
+    };
+    
+    res.json(config);
+});
+
+// Google OAuth registration endpoint
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        console.log('=== Google OAuth Server-side Process ===');
+        console.log('Request body:', req.body);
+        
+        const { access_token, purpose, industry, occupation, birth_date, plan, device_id, ip_address } = req.body;
+        
+        if (!access_token) {
+            return res.status(400).json({
+                success: false,
+                error: 'Access token is required'
+            });
+        }
+        
+        // Googleからユーザー情報を取得・検証
+        console.log('Fetching user info from Google...');
+        const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`, {
+            timeout: 10000
+        });
+        
+        if (!googleResponse.data || !googleResponse.data.email) {
+            throw new Error('Failed to get user info from Google');
+        }
+        
+        const userInfo = googleResponse.data;
+        console.log('Google user info:', { 
+            email: userInfo.email, 
+            name: userInfo.name, 
+            verified_email: userInfo.verified_email 
+        });
+        
+        // バックエンドAPIに認証付きでリクエスト送信
+        const backendUrl = `${BACKEND_URL}/oauth/google`;
+        console.log('Calling backend API:', backendUrl);
+        
+        const client = await auth.getIdTokenClient(BACKEND_URL);
+        const headers = await client.getRequestHeaders();
+        
+        const backendResponse = await axios({
+            method: 'POST',
+            url: backendUrl,
+            data: {
+                access_token: access_token,
+                purpose: purpose,
+                industry: industry,
+                occupation: occupation,
+                birth_date: birth_date,
+                plan: plan,
+                device_id: device_id,
+                ip_address: ip_address
+            },
+            headers: {
+                ...headers, // Authorization header
+                'Content-Type': 'application/json',
+                'X-Forwarded-For': req.ip,
+                'X-Original-Host': req.hostname
+            },
+            timeout: 30000
+        });
+        
+        console.log('Backend response:', backendResponse.status);
+        
+        // 成功レスポンス
+        res.status(backendResponse.status).json({
+            success: true,
+            message: 'Google user registered successfully',
+            user_id: backendResponse.data.user_id,
+            email: userInfo.email
+        });
+        
+    } catch (error) {
+        console.error('Google OAuth server-side error:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
+        
+        // エラーレスポンス
+        const statusCode = error.response?.status || 500;
+        const errorMessage = error.response?.data?.error || error.message || 'Google OAuth registration failed';
+        
+        res.status(statusCode).json({
+            success: false,
+            error: errorMessage
+        });
+    }
+});
+
 // Serve React app for all other routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './SignupPage.css';
@@ -20,6 +20,23 @@ const SignupPage = () => {
     const [errors, setErrors] = useState({});
     const [showGoogleForm, setShowGoogleForm] = useState(false);
     const [googleUserInfo, setGoogleUserInfo] = useState(null);
+    const [googleClientId, setGoogleClientId] = useState('');
+
+    // 設定を取得
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                console.log('Config loaded:', config);
+                setGoogleClientId(config.GOOGLE_CLIENT_ID || '');
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            }
+        };
+        
+        fetchConfig();
+    }, []);
 
     // デバイスフィンガープリントを生成する関数
     const generateDeviceFingerprint = () => {
@@ -75,9 +92,15 @@ const SignupPage = () => {
     // Google OAuth処理
     const handleGoogleSignup = async () => {
         console.log('=== Google OAuth 開始 ===');
-        console.log('Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+        console.log('Client ID:', googleClientId);
         console.log('Current URL:', window.location.href);
         console.log('Domain:', window.location.hostname);
+        
+        if (!googleClientId) {
+            console.error('Google Client ID is not loaded yet');
+            alert('設定の読み込み中です。しばらく待ってからお試しください。');
+            return;
+        }
 
         if (!window.google) {
             console.error('Google Sign-In API が読み込まれていません');
@@ -96,7 +119,7 @@ const SignupPage = () => {
             // Google Identity Services (GIS) を使用
             console.log('TokenClient 初期化開始...');
             const client = window.google.accounts.oauth2.initTokenClient({
-                client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                client_id: googleClientId,
                 scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
                 callback: async (response) => {
                     console.log('=== OAuth Callback 開始 ===');
@@ -180,7 +203,7 @@ const SignupPage = () => {
         }
     };
 
-    // Google OAuth登録処理
+    // Google OAuth登録処理（サーバーサイド経由）
     const handleGoogleFormSubmit = async (e) => {
         e.preventDefault();
 
@@ -194,8 +217,8 @@ const SignupPage = () => {
             // デバイス情報を取得
             const { deviceId, ipAddress } = await getDeviceInfo();
 
-            // Google OAuth ユーザー登録API呼び出し
-            const response = await fetch('/api/users/oauth/google', {
+            // サーバーサイドGoogle OAuth登録API呼び出し
+            const response = await fetch('/api/auth/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -215,7 +238,7 @@ const SignupPage = () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert(`${t('signup.success.registered')} (${googleUserInfo.email})`);
+                alert(`${t('signup.success.registered')} (${result.email})`);
                 // 成功時の処理
                 // window.location.href = '/login';
             } else {
