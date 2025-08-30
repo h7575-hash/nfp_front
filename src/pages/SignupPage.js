@@ -12,12 +12,15 @@ const SignupPage = () => {
         purpose: '',
         industry: '',
         occupation: '',
+        company_name: '',
+        position: '',
         birth_date: '',
         plan: 'free',
         agreeToTerms: false
     });
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [successMessage, setSuccessMessage] = useState('');
     const [showGoogleForm, setShowGoogleForm] = useState(false);
     const [googleUserInfo, setGoogleUserInfo] = useState(null);
     const [googleClientId, setGoogleClientId] = useState('');
@@ -228,6 +231,8 @@ const SignupPage = () => {
                     purpose: formData.purpose,
                     industry: formData.industry,
                     occupation: formData.occupation,
+                    company_name: formData.company_name,
+                    position: formData.position,
                     birth_date: formData.birth_date,
                     plan: formData.plan,
                     device_id: deviceId,
@@ -238,9 +243,11 @@ const SignupPage = () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert(`${t('signup.success.registered')} (${result.email})`);
-                // 成功時の処理
-                // window.location.href = '/login';
+                // 成功メッセージを表示してホーム画面へリダイレクト
+                setSuccessMessage(t('signup.success.googleAccountCreated'));
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
             } else {
                 throw new Error(result.error || `Registration failed (Status: ${response.status})`);
             }
@@ -262,6 +269,12 @@ const SignupPage = () => {
         if (!formData.industry) newErrors.industry = t('signup.validation.industryRequired');
         if (!formData.occupation) newErrors.occupation = t('signup.validation.occupationRequired');
         if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
+        
+        // ビジネス情報チェック（ビジネスまたは両方の場合）
+        if (formData.purpose === 'business' || formData.purpose === 'both') {
+            if (!formData.company_name) newErrors.company_name = '会社名は必須です';
+            if (!formData.position) newErrors.position = '役職は必須です';
+        }
         
         if (formData.birth_date) {
             const birthDate = new Date(formData.birth_date);
@@ -345,6 +358,12 @@ const SignupPage = () => {
         if (!formData.industry) newErrors.industry = t('signup.validation.industryRequired');
         if (!formData.occupation) newErrors.occupation = t('signup.validation.occupationRequired');
         if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
+        
+        // ビジネス情報チェック（ビジネスまたは両方の場合）
+        if (formData.purpose === 'business' || formData.purpose === 'both') {
+            if (!formData.company_name) newErrors.company_name = '会社名は必須です';
+            if (!formData.position) newErrors.position = '役職は必須です';
+        }
         if (formData.birth_date) {
             const birthDate = new Date(formData.birth_date);
             const today = new Date();
@@ -406,6 +425,8 @@ const SignupPage = () => {
                     purpose: formData.purpose,
                     industry: formData.industry,
                     occupation: formData.occupation,
+                    company_name: formData.company_name,
+                    position: formData.position,
                     birth_date: formData.birth_date,
                     plan: formData.plan,
                     device_id: deviceId,
@@ -418,9 +439,11 @@ const SignupPage = () => {
             console.log('Response data:', result);
             
             if (response.ok && result.success) {
-                alert(t('signup.success.registered'));
-                // 成功時の処理（ログインページへリダイレクトなど）
-                // window.location.href = '/login';
+                // 成功メッセージを表示してホーム画面へリダイレクト
+                setSuccessMessage(t('signup.success.accountCreated'));
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
             } else {
                 throw new Error(result.error || `Registration failed (Status: ${response.status})`);
             }
@@ -441,6 +464,16 @@ const SignupPage = () => {
                     <p>{t('signup.subtitle')}</p>
                 </div>
 
+                {/* 成功メッセージ */}
+                {successMessage && (
+                    <div className="success-message">
+                        <div className="success-content">
+                            <span className="success-icon">✓</span>
+                            <span className="success-text">{successMessage}</span>
+                        </div>
+                    </div>
+                )}
+
                 {showGoogleForm ? (
                     // Google OAuth登録フォーム
                     <div className="google-signup-form">
@@ -454,6 +487,22 @@ const SignupPage = () => {
                         </div>
 
                         <form onSubmit={handleGoogleFormSubmit} className="signup-form">
+                            {/* 生年月日 */}
+                            <div className="form-group">
+                                <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
+                                <input
+                                    type="date"
+                                    id="birth_date"
+                                    name="birth_date"
+                                    value={formData.birth_date}
+                                    onChange={handleChange}
+                                    defaultValue="2020-01-01"
+                                    max={new Date().toISOString().split('T')[0]}
+                                    className={`form-input ${errors.birth_date ? 'error' : ''}`}
+                                />
+                                {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
+                            </div>
+
                             {/* 利用目的 */}
                             <div className="form-group">
                                 <label htmlFor="purpose">{t('signup.form.purpose')} *</label>
@@ -474,66 +523,129 @@ const SignupPage = () => {
                                 {errors.purpose && <span className="error-message">{errors.purpose}</span>}
                             </div>
 
-                            {/* 業種・職種 */}
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label htmlFor="industry">{t('signup.form.industry')} *</label>
-                                    <select
-                                        id="industry"
-                                        name="industry"
-                                        value={formData.industry}
-                                        onChange={handleChange}
-                                        className={`form-input ${errors.industry ? 'error' : ''}`}
-                                    >
-                                        <option value="">{t('signup.form.selectPlaceholder')}</option>
-                                        {industryOptions.map(option => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.industry && <span className="error-message">{errors.industry}</span>}
+                            {/* 業種・職種（ビジネスまたは両方の場合のみ表示） */}
+                            {(formData.purpose === 'business' || formData.purpose === 'both') && (
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="industry">{t('signup.form.industry')} *</label>
+                                        <select
+                                            id="industry"
+                                            name="industry"
+                                            value={formData.industry}
+                                            onChange={handleChange}
+                                            className={`form-input ${errors.industry ? 'error' : ''}`}
+                                        >
+                                            <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                            {industryOptions.map(option => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.industry && <span className="error-message">{errors.industry}</span>}
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
+                                        <select
+                                            id="occupation"
+                                            name="occupation"
+                                            value={formData.occupation}
+                                            onChange={handleChange}
+                                            className={`form-input ${errors.occupation ? 'error' : ''}`}
+                                        >
+                                            <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                            {occupationOptions.map(option => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.occupation && <span className="error-message">{errors.occupation}</span>}
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
-                                    <select
-                                        id="occupation"
-                                        name="occupation"
-                                        value={formData.occupation}
-                                        onChange={handleChange}
-                                        className={`form-input ${errors.occupation ? 'error' : ''}`}
-                                    >
-                                        <option value="">{t('signup.form.selectPlaceholder')}</option>
-                                        {occupationOptions.map(option => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.occupation && <span className="error-message">{errors.occupation}</span>}
-                                </div>
-                            </div>
+                            )}
 
-                            {/* 生年月日 */}
-                            <div className="form-group">
-                                <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
-                                <input
-                                    type="date"
-                                    id="birth_date"
-                                    name="birth_date"
-                                    value={formData.birth_date}
-                                    onChange={handleChange}
-                                    defaultValue="2020-01-01"
-                                    max={new Date().toISOString().split('T')[0]}
-                                    className={`form-input ${errors.birth_date ? 'error' : ''}`}
-                                />
-                                {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
-                            </div>
+                            {/* ビジネス情報（ビジネスまたは両方の場合のみ表示） */}
+                            {(formData.purpose === 'business' || formData.purpose === 'both') && (
+                                <div className="business-fields">
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="company_name">会社名 *</label>
+                                            <input
+                                                type="text"
+                                                id="company_name"
+                                                name="company_name"
+                                                value={formData.company_name}
+                                                onChange={handleChange}
+                                                className={`form-input ${errors.company_name ? 'error' : ''}`}
+                                                placeholder="株式会社○○"
+                                            />
+                                            {errors.company_name && <span className="error-message">{errors.company_name}</span>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="position">役職 *</label>
+                                            <select
+                                                id="position"
+                                                name="position"
+                                                value={formData.position}
+                                                onChange={handleChange}
+                                                className={`form-input ${errors.position ? 'error' : ''}`}
+                                            >
+                                                <option value="">選択してください</option>
+                                                <option value="代表取締役">代表取締役</option>
+                                                <option value="取締役">取締役</option>
+                                                <option value="執行役員">執行役員</option>
+                                                <option value="部長">部長</option>
+                                                <option value="課長">課長</option>
+                                                <option value="係長">係長</option>
+                                                <option value="主任">主任</option>
+                                                <option value="チームリーダー">チームリーダー</option>
+                                                <option value="マネージャー">マネージャー</option>
+                                                <option value="一般社員">一般社員</option>
+                                                <option value="契約社員">契約社員</option>
+                                                <option value="派遣社員">派遣社員</option>
+                                                <option value="アルバイト・パート">アルバイト・パート</option>
+                                                <option value="インターン">インターン</option>
+                                                <option value="その他">その他</option>
+                                            </select>
+                                            {errors.position && <span className="error-message">{errors.position}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* プラン選択 */}
                             <div className="form-group">
                                 <label>{t('signup.form.plan')}</label>
                                 <div className="plan-options">
+                                    <label className="plan-option">
+                                        <input
+                                            type="radio"
+                                            name="plan"
+                                            value="unlimited"
+                                            checked={formData.plan === 'unlimited'}
+                                            onChange={handleChange}
+                                        />
+                                        <div className="plan-card">
+                                            <h3>{t('signup.plans.unlimited')}</h3>
+                                            <p>{t('signup.plans.unlimitedDescription')}</p>
+                                            <div className="price">{t('signup.plans.unlimitedPrice')}</div>
+                                        </div>
+                                    </label>
+                                    <label className="plan-option">
+                                        <input
+                                            type="radio"
+                                            name="plan"
+                                            value="plus"
+                                            checked={formData.plan === 'plus'}
+                                            onChange={handleChange}
+                                        />
+                                        <div className="plan-card">
+                                            <h3>{t('signup.plans.plus')}</h3>
+                                            <p>{t('signup.plans.plusDescription')}</p>
+                                            <div className="price">{t('signup.plans.plusPrice')}</div>
+                                        </div>
+                                    </label>
                                     <label className="plan-option">
                                         <input
                                             type="radio"
@@ -546,20 +658,6 @@ const SignupPage = () => {
                                             <h3>{t('signup.plans.free')}</h3>
                                             <p>{t('signup.plans.freeDescription')}</p>
                                             <div className="price">{t('signup.plans.freePrice')}</div>
-                                        </div>
-                                    </label>
-                                    <label className="plan-option">
-                                        <input
-                                            type="radio"
-                                            name="plan"
-                                            value="premium"
-                                            checked={formData.plan === 'premium'}
-                                            onChange={handleChange}
-                                        />
-                                        <div className="plan-card">
-                                            <h3>{t('signup.plans.premium')}</h3>
-                                            <p>{t('signup.plans.premiumDescription')}</p>
-                                            <div className="price">{t('signup.plans.premiumPrice')}</div>
                                         </div>
                                     </label>
                                 </div>
@@ -654,6 +752,22 @@ const SignupPage = () => {
                         </div>
                     </div>
 
+                    {/* 生年月日 */}
+                    <div className="form-group">
+                        <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
+                        <input
+                            type="date"
+                            id="birth_date"
+                            name="birth_date"
+                            value={formData.birth_date}
+                            onChange={handleChange}
+                            defaultValue="2020-01-01"
+                            max={new Date().toISOString().split('T')[0]}
+                            className={`form-input ${errors.birth_date ? 'error' : ''}`}
+                        />
+                        {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
+                    </div>
+
                     {/* 利用目的 */}
                     <div className="form-group">
                         <label htmlFor="purpose">{t('signup.form.purpose')} *</label>
@@ -674,66 +788,129 @@ const SignupPage = () => {
                         {errors.purpose && <span className="error-message">{errors.purpose}</span>}
                     </div>
 
-                    {/* 業種・職種 */}
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label htmlFor="industry">{t('signup.form.industry')} *</label>
-                            <select
-                                id="industry"
-                                name="industry"
-                                value={formData.industry}
-                                onChange={handleChange}
-                                className={`form-input ${errors.industry ? 'error' : ''}`}
-                            >
-                                <option value="">{t('signup.form.selectPlaceholder')}</option>
-                                {industryOptions.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.industry && <span className="error-message">{errors.industry}</span>}
+                    {/* 業種・職種（ビジネスまたは両方の場合のみ表示） */}
+                    {(formData.purpose === 'business' || formData.purpose === 'both') && (
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label htmlFor="industry">{t('signup.form.industry')} *</label>
+                                <select
+                                    id="industry"
+                                    name="industry"
+                                    value={formData.industry}
+                                    onChange={handleChange}
+                                    className={`form-input ${errors.industry ? 'error' : ''}`}
+                                >
+                                    <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                    {industryOptions.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.industry && <span className="error-message">{errors.industry}</span>}
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
+                                <select
+                                    id="occupation"
+                                    name="occupation"
+                                    value={formData.occupation}
+                                    onChange={handleChange}
+                                    className={`form-input ${errors.occupation ? 'error' : ''}`}
+                                >
+                                    <option value="">{t('signup.form.selectPlaceholder')}</option>
+                                    {occupationOptions.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.occupation && <span className="error-message">{errors.occupation}</span>}
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
-                            <select
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={handleChange}
-                                className={`form-input ${errors.occupation ? 'error' : ''}`}
-                            >
-                                <option value="">{t('signup.form.selectPlaceholder')}</option>
-                                {occupationOptions.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.occupation && <span className="error-message">{errors.occupation}</span>}
-                        </div>
-                    </div>
+                    )}
 
-                    {/* 生年月日 */}
-                    <div className="form-group">
-                        <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
-                        <input
-                            type="date"
-                            id="birth_date"
-                            name="birth_date"
-                            value={formData.birth_date}
-                            onChange={handleChange}
-                            defaultValue="2020-01-01"
-                            max={new Date().toISOString().split('T')[0]}
-                            className={`form-input ${errors.birth_date ? 'error' : ''}`}
-                        />
-                        {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
-                    </div>
+                    {/* ビジネス情報（ビジネスまたは両方の場合のみ表示） */}
+                    {(formData.purpose === 'business' || formData.purpose === 'both') && (
+                        <div className="business-fields">
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="company_name">会社名 *</label>
+                                    <input
+                                        type="text"
+                                        id="company_name"
+                                        name="company_name"
+                                        value={formData.company_name}
+                                        onChange={handleChange}
+                                        className={`form-input ${errors.company_name ? 'error' : ''}`}
+                                        placeholder="株式会社○○"
+                                    />
+                                    {errors.company_name && <span className="error-message">{errors.company_name}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="position">役職 *</label>
+                                    <select
+                                        id="position"
+                                        name="position"
+                                        value={formData.position}
+                                        onChange={handleChange}
+                                        className={`form-input ${errors.position ? 'error' : ''}`}
+                                    >
+                                        <option value="">選択してください</option>
+                                        <option value="代表取締役">代表取締役</option>
+                                        <option value="取締役">取締役</option>
+                                        <option value="執行役員">執行役員</option>
+                                        <option value="部長">部長</option>
+                                        <option value="課長">課長</option>
+                                        <option value="係長">係長</option>
+                                        <option value="主任">主任</option>
+                                        <option value="チームリーダー">チームリーダー</option>
+                                        <option value="マネージャー">マネージャー</option>
+                                        <option value="一般社員">一般社員</option>
+                                        <option value="契約社員">契約社員</option>
+                                        <option value="派遣社員">派遣社員</option>
+                                        <option value="アルバイト・パート">アルバイト・パート</option>
+                                        <option value="インターン">インターン</option>
+                                        <option value="その他">その他</option>
+                                    </select>
+                                    {errors.position && <span className="error-message">{errors.position}</span>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* プラン選択 */}
                     <div className="form-group">
                         <label>{t('signup.form.plan')}</label>
                         <div className="plan-options">
+                            <label className="plan-option">
+                                <input
+                                    type="radio"
+                                    name="plan"
+                                    value="unlimited"
+                                    checked={formData.plan === 'unlimited'}
+                                    onChange={handleChange}
+                                />
+                                <div className="plan-card">
+                                    <h3>{t('signup.plans.unlimited')}</h3>
+                                    <p>{t('signup.plans.unlimitedDescription')}</p>
+                                    <div className="price">{t('signup.plans.unlimitedPrice')}</div>
+                                </div>
+                            </label>
+                            <label className="plan-option">
+                                <input
+                                    type="radio"
+                                    name="plan"
+                                    value="plus"
+                                    checked={formData.plan === 'plus'}
+                                    onChange={handleChange}
+                                />
+                                <div className="plan-card">
+                                    <h3>{t('signup.plans.plus')}</h3>
+                                    <p>{t('signup.plans.plusDescription')}</p>
+                                    <div className="price">{t('signup.plans.plusPrice')}</div>
+                                </div>
+                            </label>
                             <label className="plan-option">
                                 <input
                                     type="radio"
@@ -746,20 +923,6 @@ const SignupPage = () => {
                                     <h3>{t('signup.plans.free')}</h3>
                                     <p>{t('signup.plans.freeDescription')}</p>
                                     <div className="price">{t('signup.plans.freePrice')}</div>
-                                </div>
-                            </label>
-                            <label className="plan-option">
-                                <input
-                                    type="radio"
-                                    name="plan"
-                                    value="premium"
-                                    checked={formData.plan === 'premium'}
-                                    onChange={handleChange}
-                                />
-                                <div className="plan-card">
-                                    <h3>{t('signup.plans.premium')}</h3>
-                                    <p>{t('signup.plans.premiumDescription')}</p>
-                                    <div className="price">{t('signup.plans.premiumPrice')}</div>
                                 </div>
                             </label>
                         </div>

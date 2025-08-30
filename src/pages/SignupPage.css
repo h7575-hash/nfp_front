@@ -113,8 +113,8 @@
 
 /* プラン選択 */
 .plan-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 1rem;
     margin-top: 0.5rem;
 }
@@ -230,10 +230,22 @@
     }
     
     .plan-options {
-        grid-template-columns: 1fr;
+        flex-direction: column;
     }
     
     .signup-header h1 {
         font-size: 1.75rem;
     }
+}
+
+/* 日付入力フィールドのカレンダーピッカーを無効化 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-outer-spin-button {
+    display: none;
+    -webkit-appearance: none;
 }

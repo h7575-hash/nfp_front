@@ -113,7 +113,9 @@
       "termsRequired": "Agreement to terms of service is required"
     },
     "success": {
-      "registered": "Registration completed successfully!"
+      "registered": "Registration completed successfully!",
+      "accountCreated": "Account creation completed!",
+      "googleAccountCreated": "Google account registration completed!"
     },
     "errors": {
       "registrationFailed": "Registration failed"
@@ -147,12 +149,15 @@
       "other": "Other"
     },
     "plans": {
-      "free": "Free Plan",
+      "free": "Free",
       "freeDescription": "Access basic notification features",
       "freePrice": "$0/month",
-      "premium": "Premium Plan",
-      "premiumDescription": "Advanced analytics and priority notifications",
-      "premiumPrice": "$9.80/month"
+      "plus": "Plus",
+      "plusDescription": "Advanced analytics and priority notifications",
+      "plusPrice": "$9.80/month",
+      "unlimited": "Unlimited",
+      "unlimitedDescription": "All features available without limits",
+      "unlimitedPrice": "$29.80/month"
     },
     "footer": {
       "hasAccount": "Already have an account? ",

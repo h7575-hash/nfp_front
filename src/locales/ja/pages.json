@@ -69,7 +69,7 @@
   },
   "signup": {
     "title": "新規登録",
-    "subtitle": "News dogにご登録いただき、ありがとうございます",
+    "subtitle": "News dogをご利用いただき、ありがとうございます",
     "form": {
       "email": "メールアドレス",
       "emailPlaceholder": "your@email.com",
@@ -113,7 +113,9 @@
       "termsRequired": "利用規約への同意が必要です"
     },
     "success": {
-      "registered": "登録が完了しました！"
+      "registered": "登録が完了しました！",
+      "accountCreated": "アカウントの作成が完了しました！",
+      "googleAccountCreated": "Googleアカウントでの登録が完了しました！"
     },
     "errors": {
       "registrationFailed": "登録に失敗しました"
@@ -147,12 +149,15 @@
       "other": "その他"
     },
     "plans": {
-      "free": "無料プラン",
+      "free": "Free",
       "freeDescription": "基本的な通知機能をご利用いただけます",
       "freePrice": "¥0/月",
-      "premium": "有料プラン",
-      "premiumDescription": "高度な分析機能と優先通知をご利用いただけます",
-      "premiumPrice": "¥980/月"
+      "plus": "Plus",
+      "plusDescription": "高度な分析機能と優先通知をご利用いただけます",
+      "plusPrice": "¥980/月",
+      "unlimited": "Unlimited",
+      "unlimitedDescription": "すべての機能を無制限でご利用いただけます",
+      "unlimitedPrice": "¥2,980/月"
     },
     "footer": {
       "hasAccount": "既にアカウントをお持ちですか？",
