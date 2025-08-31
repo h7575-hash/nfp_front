@@ -81,9 +81,12 @@
     border-radius: 8px;
     background: white;
     transition: all 0.15s ease;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
+}
+
+/* CardElementコンポーネント自体（Stripeがマウントするdiv）に
+   対して幅を100%にする設定を追加 */
+.card-element-container .StripeElement {
+    width: 100%;
 }
 
 .card-element-container:hover {
