@@ -20,7 +20,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 // Configuration endpoint for client-side
 app.get('/config', (req, res) => {
     const config = {
-        GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || ''
+        GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || '',
+        STRIPE_PUBLISHABLE_KEY: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || ''
     };
     
     res.json(config);

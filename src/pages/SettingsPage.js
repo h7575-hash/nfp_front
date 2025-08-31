@@ -43,6 +43,10 @@ function SettingsPage() {
     const [showProfileForm, setShowProfileForm] = useState(false);
     const [profileErrors, setProfileErrors] = useState({});
     
+    // 決済管理関連のstate
+    const [subscriptionInfo, setSubscriptionInfo] = useState(null);
+    const [isLoadingPayment, setIsLoadingPayment] = useState(false);
+    
     // コンポーネント初期化時にユーザー設定を取得
     useEffect(() => {
         loadUserSettings();
@@ -104,10 +108,73 @@ function SettingsPage() {
                     
                     // プラン情報を反映
                     setCurrentPlan(data.user.plan || 'free');
+                    
+                    // サブスクリプション情報を取得
+                    if (data.user.plan !== 'free') {
+                        loadSubscriptionInfo();
+                    }
                 }
             }
         } catch (error) {
             console.error('Error loading user settings:', error);
+        }
+    };
+    
+    // サブスクリプション情報を取得
+    const loadSubscriptionInfo = async () => {
+        try {
+            const response = await fetch('/api/payments/subscription-info', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    setSubscriptionInfo(data.subscription);
+                } else {
+                    console.error('Failed to load subscription info:', data.error);
+                    // Stripeエラーの場合は特別なメッセージを表示
+                    if (data.stripe_error) {
+                        setSubscriptionInfo({ error: 'Stripe接続エラーのため、決済情報を表示できません。' });
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error loading subscription info:', error);
+            setSubscriptionInfo({ error: 'ネットワークエラーのため、決済情報を表示できません。' });
+        }
+    };
+    
+    // カスタマーポータルを開く
+    const handleOpenCustomerPortal = async () => {
+        setIsLoadingPayment(true);
+        try {
+            const response = await fetch('/api/payments/customer-portal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    return_url: window.location.origin + '/settings'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.url) {
+                // カスタマーポータルに遷移
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.error || 'Failed to open customer portal');
+            }
+        } catch (error) {
+            console.error('Error opening customer portal:', error);
+            alert(`カスタマーポータルを開けませんでした: ${error.message}`);
+        } finally {
+            setIsLoadingPayment(false);
         }
     };
 
@@ -578,6 +645,91 @@ function SettingsPage() {
                                     >
                                         キャンセル
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* 決済管理セクション */}
+                <div className="settings-section">
+                    <h2 className="settings-section-title">決済・請求書管理</h2>
+                    
+                    {currentPlan === 'free' ? (
+                        <div className="billing-info">
+                            <div className="billing-status">
+                                <div className="status-item">
+                                    <span className="status-label">現在のプラン:</span>
+                                    <span className="status-value free-plan">無料プラン</span>
+                                </div>
+                                <p className="status-description">
+                                    無料プランをご利用中です。有料プランにアップグレードすると、より多くの機能をご利用いただけます。
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="billing-info">
+                            <div className="billing-status">
+                                <div className="status-item">
+                                    <span className="status-label">現在のプラン:</span>
+                                    <span className={`status-value ${currentPlan}-plan`}>
+                                        {currentPlan === 'plus' ? 'Plusプラン' : 'Unlimitedプラン'}
+                                    </span>
+                                </div>
+                                {subscriptionInfo && subscriptionInfo.error ? (
+                                    <div className="billing-error">
+                                        <span className="error-icon">⚠️</span>
+                                        <span className="error-message">{subscriptionInfo.error}</span>
+                                    </div>
+                                ) : subscriptionInfo && (
+                                    <>
+                                        <div className="status-item">
+                                            <span className="status-label">次回請求日:</span>
+                                            <span className="status-value">
+                                                {new Date(subscriptionInfo.next_billing_date).toLocaleDateString('ja-JP')}
+                                            </span>
+                                        </div>
+                                        <div className="status-item">
+                                            <span className="status-label">請求金額:</span>
+                                            <span className="status-value">
+                                                ¥{subscriptionInfo.amount.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="status-item">
+                                            <span className="status-label">ステータス:</span>
+                                            <span className={`status-value status-${subscriptionInfo.status}`}>
+                                                {subscriptionInfo.status === 'active' ? '有効' :
+                                                 subscriptionInfo.status === 'canceled' ? 'キャンセル済み' :
+                                                 subscriptionInfo.status === 'past_due' ? '支払い遅延' : subscriptionInfo.status}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            
+                            <div className="billing-actions">
+                                <button 
+                                    className="settings-button primary"
+                                    onClick={handleOpenCustomerPortal}
+                                    disabled={isLoadingPayment}
+                                >
+                                    {isLoadingPayment ? (
+                                        <>
+                                            <span className="spinner"></span>
+                                            読み込み中...
+                                        </>
+                                    ) : (
+                                        '請求書・支払い管理'
+                                    )}
+                                </button>
+                                <div className="billing-help">
+                                    <p>カスタマーポータルでは以下の操作が可能です：</p>
+                                    <ul>
+                                        <li>請求書の確認・ダウンロード</li>
+                                        <li>支払い方法の変更</li>
+                                        <li>プランの変更・キャンセル</li>
+                                        <li>請求履歴の確認</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>

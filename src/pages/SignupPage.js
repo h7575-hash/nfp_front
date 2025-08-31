@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import StripePaymentForm from '../components/StripePaymentForm';
 import './SignupPage.css';
 
 const SignupPage = () => {
@@ -24,6 +25,8 @@ const SignupPage = () => {
     const [showGoogleForm, setShowGoogleForm] = useState(false);
     const [googleUserInfo, setGoogleUserInfo] = useState(null);
     const [googleClientId, setGoogleClientId] = useState('');
+    const [showPaymentStep, setShowPaymentStep] = useState(false);
+    const [validatedUserData, setValidatedUserData] = useState(null);
 
     // 設定を取得
     useEffect(() => {
@@ -408,53 +411,98 @@ const SignupPage = () => {
         setIsLoading(true);
         
         try {
-            console.log('ユーザー登録処理:', formData);
+            console.log('ユーザー登録処理 - バリデーション完了:', formData);
             
             // デバイス情報を取得
             const { deviceId, ipAddress } = await getDeviceInfo();
             
-            // プロキシ経由でAPIリクエスト送信
-            const response = await fetch('/api/users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password,
-                    purpose: formData.purpose,
-                    industry: formData.industry,
-                    occupation: formData.occupation,
-                    company_name: formData.company_name,
-                    position: formData.position,
-                    birth_date: formData.birth_date,
-                    plan: formData.plan,
-                    device_id: deviceId,
-                    ip_address: ipAddress
-                })
-            });
+            // ユーザーデータを準備して決済ステップへ
+            const userData = {
+                email: formData.email,
+                password: formData.password,
+                purpose: formData.purpose,
+                industry: formData.industry,
+                occupation: formData.occupation,
+                company_name: formData.company_name,
+                position: formData.position,
+                birth_date: formData.birth_date,
+                plan: formData.plan,
+                device_id: deviceId,
+                ip_address: ipAddress
+            };
             
-            const result = await response.json();
-            console.log('Response status:', response.status);
-            console.log('Response data:', result);
-            
-            if (response.ok && result.success) {
-                // 成功メッセージを表示してホーム画面へリダイレクト
-                setSuccessMessage(t('signup.success.accountCreated'));
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
-            } else {
-                throw new Error(result.error || `Registration failed (Status: ${response.status})`);
-            }
+            setValidatedUserData(userData);
+            setShowPaymentStep(true);
             
         } catch (error) {
-            console.error('登録エラー:', error);
+            console.error('フォーム処理エラー:', error);
             alert(`${t('signup.errors.registrationFailed')}: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
     };
+
+    // 決済成功時の処理
+    const handlePaymentSuccess = (result) => {
+        console.log('Payment successful:', result);
+        setSuccessMessage(result.message || 'アカウントが正常に作成されました');
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    };
+
+    // 決済エラー時の処理
+    const handlePaymentError = (error) => {
+        console.error('Payment error:', error);
+        alert(`決済処理エラー: ${error}`);
+        // エラー時は決済ステップに戻る
+        setShowPaymentStep(false);
+        setValidatedUserData(null);
+    };
+
+    // 決済ステップから戻る
+    const handleBackToForm = () => {
+        setShowPaymentStep(false);
+        setValidatedUserData(null);
+        setShowGoogleForm(false);
+    };
+
+    // 決済ステップの表示
+    if (showPaymentStep && validatedUserData) {
+        return (
+            <div className="signup-container">
+                <div className="signup-card">
+                    <div className="signup-header">
+                        <button 
+                            type="button" 
+                            onClick={handleBackToForm}
+                            className="back-button"
+                        >
+                            ← 戻る
+                        </button>
+                        <h1>決済情報の入力</h1>
+                        <p>登録を完了するために決済情報を入力してください</p>
+                    </div>
+
+                    {/* 成功メッセージ */}
+                    {successMessage && (
+                        <div className="success-message">
+                            <div className="success-content">
+                                <span className="success-icon">✓</span>
+                                <span className="success-text">{successMessage}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <StripePaymentForm 
+                        userData={validatedUserData}
+                        onSuccess={handlePaymentSuccess}
+                        onError={handlePaymentError}
+                    />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="signup-container">
