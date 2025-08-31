@@ -735,7 +735,7 @@ const SignupPage = () => {
                                             {t('signup.form.termsLink')}
                                         </a>
                                         {t('signup.form.and')}
-                                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                        <a href="https://sage-metal-8c6.notion.site/25913b91bf6c80a783cae4826e447291" target="_blank" rel="noopener noreferrer" className="terms-link">
                                             {t('signup.form.privacyLink')}
                                         </a>
                                     </span>
@@ -1000,7 +1000,7 @@ const SignupPage = () => {
                                     {t('signup.form.termsLink')}
                                 </a>
                                 {t('signup.form.and')}
-                                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                <a href="https://sage-metal-8c6.notion.site/25913b91bf6c80a783cae4826e447291" target="_blank" rel="noopener noreferrer" className="terms-link">
                                     {t('signup.form.privacyLink')}
                                 </a>
                             </span>
