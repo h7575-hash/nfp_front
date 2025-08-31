@@ -282,20 +282,18 @@ const StripePaymentForm = ({ userData, onSuccess, onError }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        const initStripe = async () => {
+        const initStripe = () => {
             try {
-                // 設定からStripe公開キーを取得
-                const response = await fetch('/config');
-                const config = await response.json();
+                const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
                 
-                if (config.STRIPE_PUBLISHABLE_KEY) {
-                    setStripePromise(loadStripe(config.STRIPE_PUBLISHABLE_KEY));
+                if (stripePublishableKey) {
+                    setStripePromise(loadStripe(stripePublishableKey));
                 } else {
-                    console.error('Stripe publishable key not found in config');
+                    console.error('Stripe publishable key not found in environment variables');
                     onError('決済システムの初期化に失敗しました');
                 }
             } catch (error) {
-                console.error('Failed to load Stripe config:', error);
+                console.error('Failed to initialize Stripe:', error);
                 onError('決済システムの初期化に失敗しました');
             }
         };
