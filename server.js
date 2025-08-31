@@ -137,6 +137,14 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
 
+// Configuration endpoint
+app.get('/config', (req, res) => {
+    res.json({
+        googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || '',
+        stripePublishableKey: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || ''
+    });
+});
+
 
 // Google OAuth registration endpoint
 app.post('/auth/google', async (req, res) => {

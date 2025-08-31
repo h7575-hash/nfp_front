@@ -282,14 +282,27 @@ const StripePaymentForm = ({ userData, onSuccess, onError }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        const initStripe = () => {
+        const initStripe = async () => {
             try {
-                const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+                let stripePublishableKey = '';
+                
+                // まず/configから取得を試行
+                try {
+                    const response = await fetch('/config');
+                    const config = await response.json();
+                    stripePublishableKey = config.stripePublishableKey;
+                    console.log('Stripe key loaded from config:', stripePublishableKey ? 'Found' : 'Not found');
+                } catch (configError) {
+                    console.error('Failed to fetch config:', configError);
+                    // フォールバック：環境変数から取得（ビルド時の値）
+                    stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+                    console.log('Using fallback Stripe key:', stripePublishableKey ? 'Found' : 'Not found');
+                }
                 
                 if (stripePublishableKey) {
                     setStripePromise(loadStripe(stripePublishableKey));
                 } else {
-                    console.error('Stripe publishable key not found in environment variables');
+                    console.error('Stripe publishable key not found');
                     onError('決済システムの初期化に失敗しました');
                 }
             } catch (error) {

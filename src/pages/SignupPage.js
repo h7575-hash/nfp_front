@@ -30,9 +30,21 @@ const SignupPage = () => {
 
     // 設定を取得
     useEffect(() => {
-        const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
-        console.log('Google Client ID loaded from env:', googleClientId);
-        setGoogleClientId(googleClientId);
+        const fetchConfig = async () => {
+            try {
+                const response = await fetch('/config');
+                const config = await response.json();
+                console.log('Google Client ID loaded from config:', config.googleClientId);
+                setGoogleClientId(config.googleClientId);
+            } catch (error) {
+                console.error('Failed to fetch config:', error);
+                // フォールバック：環境変数から取得（ビルド時の値）
+                const fallbackId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
+                console.log('Using fallback Google Client ID:', fallbackId);
+                setGoogleClientId(fallbackId);
+            }
+        };
+        fetchConfig();
     }, []);
 
     // デバイスフィンガープリントを生成する関数

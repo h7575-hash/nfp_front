@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +13,26 @@ const LoginPage = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [googleClientId, setGoogleClientId] = useState('');
+
+    // 設定を取得
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const response = await fetch('/config');
+                const config = await response.json();
+                console.log('Google Client ID loaded from config:', config.googleClientId);
+                setGoogleClientId(config.googleClientId);
+            } catch (error) {
+                console.error('Failed to fetch config:', error);
+                // フォールバック：環境変数から取得（ビルド時の値）
+                const fallbackId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
+                console.log('Using fallback Google Client ID:', fallbackId);
+                setGoogleClientId(fallbackId);
+            }
+        };
+        fetchConfig();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -53,7 +73,6 @@ const LoginPage = () => {
             return;
         }
 
-        const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
         if (!googleClientId) {
             setError('Google Client IDが設定されていません。');
             return;
