@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 依存関係をインストール（本番環境用）
-RUN npm install --production
+RUN npm install --production --legacy-peer-deps
 
 # ソースコードをコピー
 COPY . .
