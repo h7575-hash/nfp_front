@@ -37,6 +37,12 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
     const [cardComplete, setCardComplete] = useState(false);
     const [cardError, setCardError] = useState(null);
 
+    // デバッグ用のログ
+    useEffect(() => {
+        console.log('PaymentForm mounted - stripe:', stripe ? 'Ready' : 'Not ready');
+        console.log('PaymentForm mounted - elements:', elements ? 'Ready' : 'Not ready');
+    }, [stripe, elements]);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -188,6 +194,12 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
     };
 
     const handleCardChange = (event) => {
+        console.log('CardElement change event:', {
+            complete: event.complete,
+            error: event.error ? event.error.message : null,
+            elementType: event.elementType,
+            empty: event.empty
+        });
         setCardComplete(event.complete);
         setCardError(event.error ? event.error.message : null);
     };
@@ -245,6 +257,15 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
                         id="card-element"
                         options={cardElementOptions}
                         onChange={handleCardChange}
+                        onReady={() => {
+                            console.log('CardElement is ready!');
+                        }}
+                        onFocus={() => {
+                            console.log('CardElement focused');
+                        }}
+                        onBlur={() => {
+                            console.log('CardElement blurred');
+                        }}
                     />
                 </div>
                 {cardError && <div className="card-error">{cardError}</div>}
@@ -288,19 +309,35 @@ const StripePaymentForm = ({ userData, onSuccess, onError }) => {
                 
                 // まず/configから取得を試行
                 try {
+                    console.log('Fetching Stripe config from /config...');
                     const response = await fetch('/config');
                     const config = await response.json();
                     stripePublishableKey = config.stripePublishableKey;
-                    console.log('Stripe key loaded from config:', stripePublishableKey ? 'Found' : 'Not found');
+                    console.log('Stripe key loaded from config:', stripePublishableKey ? `Found: ${stripePublishableKey.substring(0, 10)}...` : 'Not found');
                 } catch (configError) {
                     console.error('Failed to fetch config:', configError);
                     // フォールバック：環境変数から取得（ビルド時の値）
                     stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
-                    console.log('Using fallback Stripe key:', stripePublishableKey ? 'Found' : 'Not found');
+                    console.log('Using fallback Stripe key:', stripePublishableKey ? `Found: ${stripePublishableKey.substring(0, 10)}...` : 'Not found');
                 }
                 
                 if (stripePublishableKey) {
-                    setStripePromise(loadStripe(stripePublishableKey));
+                    console.log('Loading Stripe with key:', stripePublishableKey.substring(0, 10) + '...');
+                    const stripeInstance = loadStripe(stripePublishableKey);
+                    console.log('Stripe loadStripe called, setting promise...');
+                    setStripePromise(stripeInstance);
+                    
+                    // Stripeの実際の初期化を確認
+                    stripeInstance.then(stripe => {
+                        console.log('Stripe initialized successfully:', stripe ? 'Success' : 'Failed');
+                        if (!stripe) {
+                            console.error('Stripe instance is null after initialization');
+                            onError('決済システムの初期化に失敗しました');
+                        }
+                    }).catch(error => {
+                        console.error('Stripe initialization error:', error);
+                        onError('決済システムの初期化に失敗しました');
+                    });
                 } else {
                     console.error('Stripe publishable key not found');
                     onError('決済システムの初期化に失敗しました');
