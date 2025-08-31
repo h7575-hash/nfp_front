@@ -731,7 +731,7 @@ const SignupPage = () => {
                                     <span className="checkmark"></span>
                                     <span className="checkbox-text">
                                         {t('signup.form.termsAgree')}
-                                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                        <a href="https://sage-metal-8c6.notion.site/25913b91bf6c800dae0bccec86de54de" target="_blank" rel="noopener noreferrer" className="terms-link">
                                             {t('signup.form.termsLink')}
                                         </a>
                                         {t('signup.form.and')}
@@ -996,7 +996,7 @@ const SignupPage = () => {
                             <span className="checkmark"></span>
                             <span className="checkbox-text">
                                 {t('signup.form.termsAgree')}
-                                <a href="/terms" target="_blank" rel="noopener noreferrer" className="terms-link">
+                                <a href="https://sage-metal-8c6.notion.site/25913b91bf6c800dae0bccec86de54de" target="_blank" rel="noopener noreferrer" className="terms-link">
                                     {t('signup.form.termsLink')}
                                 </a>
                                 {t('signup.form.and')}
