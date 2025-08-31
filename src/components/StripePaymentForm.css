@@ -1,5 +1,10 @@
 /* Stripe Payment Form Styles */
 
+.StripeElement iframe {
+    height: 40px !important;
+    min-height: 40px !important;
+}
+
 .stripe-payment-form {
     max-width: 100%;
     margin: 0 auto;
@@ -58,6 +63,8 @@
 
 .card-section {
     margin-bottom: 24px;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .card-section label {
