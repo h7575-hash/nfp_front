@@ -53,42 +53,55 @@ const LoginPage = () => {
             return;
         }
 
-        try {
-            const client = window.google.accounts.oauth2.initTokenClient({
-                client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-                scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-                callback: async (response) => {
-                    if (response.error) {
-                        setError(`Google認証エラー: ${response.error}`);
-                        return;
-                    }
+        const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        if (!googleClientId) {
+            setError('Google Client IDが設定されていません。');
+            return;
+        }
 
-                    if (response.access_token) {
-                        try {
-                            const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${response.access_token}`);
-                            const userInfo = await userInfoResponse.json();
+        try {
+            // Google Identity Services の credential response を使用
+            window.google.accounts.id.initialize({
+                client_id: googleClientId,
+                callback: async (response) => {
+                    try {
+                        if (response.credential) {
+                            // response.credential にID Tokenが含まれている
+                            const result = await googleLogin(response.credential);
                             
-                            if (userInfo.email) {
-                                const result = await googleLogin(userInfo.id_token || response.access_token);
-                                
-                                if (result.success) {
-                                    navigate('/', { replace: true });
-                                } else {
-                                    setError(result.error || 'Googleログインに失敗しました');
-                                }
+                            if (result.success) {
+                                navigate('/', { replace: true });
+                            } else {
+                                setError(result.error || 'Googleログインに失敗しました');
                             }
-                        } catch (error) {
-                            setError('ユーザー情報の取得に失敗しました');
+                        } else {
+                            setError('Google認証でID Tokenが取得できませんでした');
                         }
+                    } catch (error) {
+                        console.error('Google login error:', error);
+                        setError('Googleログインの処理中にエラーが発生しました');
                     }
                 },
-                error_callback: (error) => {
-                    setError(`Google認証に失敗しました: ${error?.message || error}`);
-                }
+                auto_select: false,
+                cancel_on_tap_outside: true
             });
 
-            client.requestAccessToken();
+            // ワンタップ認証を表示
+            window.google.accounts.id.prompt((notification) => {
+                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                    // ワンタップが表示されない場合は、ポップアップを使用
+                    window.google.accounts.id.renderButton(
+                        document.getElementById('google-signin-button'),
+                        {
+                            theme: 'outline',
+                            size: 'large',
+                            width: '100%'
+                        }
+                    );
+                }
+            });
         } catch (error) {
+            console.error('Google Identity Services initialization error:', error);
             setError('Google認証の初期化に失敗しました');
         }
     };
@@ -183,6 +196,8 @@ const LoginPage = () => {
                     <div className="divider">
                         <span>{t('login.social.divider')}</span>
                     </div>
+                    {/* Google Sign-In ボタンコンテナ */}
+                    <div id="google-signin-button" style={{ display: 'none' }}></div>
                     <button className="btn btn-social google-login" onClick={handleGoogleLogin}>
                         <span className="social-icon">🔍</span>
                         {t('login.social.googleLogin')}
