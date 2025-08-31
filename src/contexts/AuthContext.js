@@ -61,6 +61,42 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Googleログイン関数
+    const googleLogin = async (idToken) => {
+        try {
+            setLoading(true);
+            
+            const response = await fetch('/api/auth/google-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ idToken }),
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Googleログインに失敗しました');
+            }
+
+            const { token: newToken, user: userData } = data;
+            
+            setToken(newToken);
+            setUser(userData);
+            
+            localStorage.setItem('authToken', newToken);
+            localStorage.setItem('userInfo', JSON.stringify(userData));
+            
+            return { success: true, user: userData };
+        } catch (error) {
+            console.error('Google login error:', error);
+            return { success: false, error: error.message };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // ログイン関数
     const login = async (email, password) => {
         try {
@@ -153,6 +189,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!user,
         login,
+        googleLogin,
         logout,
         updateUser,
         getAuthHeaders,

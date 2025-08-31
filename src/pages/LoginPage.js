@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 const LoginPage = () => {
     const { t } = useTranslation('pages');
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, googleLogin } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -44,6 +44,52 @@ const LoginPage = () => {
             setError('ネットワークエラーが発生しました。しばらくしてから再度お試しください。');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = () => {
+        if (!window.google) {
+            setError('Google Sign-In APIが読み込まれていません。');
+            return;
+        }
+
+        try {
+            const client = window.google.accounts.oauth2.initTokenClient({
+                client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+                callback: async (response) => {
+                    if (response.error) {
+                        setError(`Google認証エラー: ${response.error}`);
+                        return;
+                    }
+
+                    if (response.access_token) {
+                        try {
+                            const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${response.access_token}`);
+                            const userInfo = await userInfoResponse.json();
+                            
+                            if (userInfo.email) {
+                                const result = await googleLogin(userInfo.id_token || response.access_token);
+                                
+                                if (result.success) {
+                                    navigate('/', { replace: true });
+                                } else {
+                                    setError(result.error || 'Googleログインに失敗しました');
+                                }
+                            }
+                        } catch (error) {
+                            setError('ユーザー情報の取得に失敗しました');
+                        }
+                    }
+                },
+                error_callback: (error) => {
+                    setError(`Google認証に失敗しました: ${error?.message || error}`);
+                }
+            });
+
+            client.requestAccessToken();
+        } catch (error) {
+            setError('Google認証の初期化に失敗しました');
         }
     };
 
@@ -137,7 +183,7 @@ const LoginPage = () => {
                     <div className="divider">
                         <span>{t('login.social.divider')}</span>
                     </div>
-                    <button className="btn btn-social google-login">
+                    <button className="btn btn-social google-login" onClick={handleGoogleLogin}>
                         <span className="social-icon">🔍</span>
                         {t('login.social.googleLogin')}
                     </button>
