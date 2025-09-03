@@ -98,8 +98,8 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                payment_method_id: paymentMethod.id,
-                user_data: userData
+                user_id: userData.user_id,
+                payment_method_id: paymentMethod.id
             }),
         });
 
@@ -139,8 +139,9 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                user_id: userData.user_id,
                 payment_method_id: paymentMethod.id,
-                user_data: userData
+                plan: userData.plan
             }),
         });
 
