@@ -75,9 +75,29 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
         }
     };
 
-    // フリープラン: 支払い方法のみ保存
+    // フリープラン: 2段階処理（ユーザー作成→支払い方法保存）
     const handleFreePaymentMethod = async (card) => {
-        // PaymentMethodを作成
+        // ステップ1: ユーザー作成（statusはpendingで作成）
+        const userCreateResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...userData,
+                status: 'pending' // カード登録前はpending
+            }),
+        });
+
+        const userCreateResult = await userCreateResponse.json();
+
+        if (!userCreateResponse.ok) {
+            throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+        }
+
+        const user_id = userCreateResult.user_id;
+
+        // ステップ2: PaymentMethodを作成
         const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
             type: 'card',
             card: card,
@@ -91,14 +111,14 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
             throw new Error(pmError.message);
         }
 
-        // バックエンドに支払い方法を保存
+        // ステップ3: バックエンドに支払い方法を保存
         const response = await fetch('/api/payments/save-payment-method', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                user_id: userData.user_id,
+                user_id: user_id,
                 payment_method_id: paymentMethod.id
             }),
         });
@@ -116,9 +136,29 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
         });
     };
 
-    // 有料プラン: サブスクリプション作成
+    // 有料プラン: 2段階処理（ユーザー作成→サブスクリプション作成）
     const handlePaidSubscription = async (card) => {
-        // PaymentMethodを作成
+        // ステップ1: ユーザー作成（statusはpendingで作成）
+        const userCreateResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...userData,
+                status: 'pending' // カード登録前はpending
+            }),
+        });
+
+        const userCreateResult = await userCreateResponse.json();
+
+        if (!userCreateResponse.ok) {
+            throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+        }
+
+        const user_id = userCreateResult.user_id;
+
+        // ステップ2: PaymentMethodを作成
         const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
             type: 'card',
             card: card,
@@ -132,14 +172,14 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
             throw new Error(pmError.message);
         }
 
-        // バックエンドでサブスクリプション作成
+        // ステップ3: バックエンドでサブスクリプション作成
         const response = await fetch('/api/payments/create-subscription', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                user_id: userData.user_id,
+                user_id: user_id,
                 payment_method_id: paymentMethod.id,
                 plan: userData.plan
             }),
