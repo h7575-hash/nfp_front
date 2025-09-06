@@ -21,6 +21,18 @@
         }
       }
     },
+    "verification": {
+      "email": {
+        "title": "Email verification required",
+        "message": "For security purposes, please complete your email verification.",
+        "button": "Verify Email"
+      },
+      "card": {
+        "title": "Payment information required",
+        "message": "Please register your card information to use our service.",
+        "button": "Register Card"
+      }
+    },
     "actions": {
       "register": {
         "title": "Register New Issue",

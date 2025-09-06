@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
 
 const HomePage = () => {
     const { t } = useTranslation('pages');
+    const { user } = useAuth();
     
     // サンプル通知データ
     const notifications = [
@@ -41,6 +43,37 @@ const HomePage = () => {
                     {t('home.subtitle')}
                 </p>
             </div>
+
+            {/* 認証状態通知 */}
+            {user && (
+                <div className="verification-notices">
+                    {!user.email_verified && (
+                        <div className="verification-notice email-notice">
+                            <div className="notice-icon">✉️</div>
+                            <div className="notice-content">
+                                <h3 className="notice-title">{t('home.verification.email.title')}</h3>
+                                <p className="notice-message">{t('home.verification.email.message')}</p>
+                                <Link to="/verify-email" className="notice-button btn btn-primary btn-sm">
+                                    {t('home.verification.email.button')}
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {!user.card_registered && (
+                        <div className="verification-notice card-notice">
+                            <div className="notice-icon">💳</div>
+                            <div className="notice-content">
+                                <h3 className="notice-title">{t('home.verification.card.title')}</h3>
+                                <p className="notice-message">{t('home.verification.card.message')}</p>
+                                <Link to="/billing" className="notice-button btn btn-primary btn-sm">
+                                    {t('home.verification.card.button')}
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* 通知セクション */}
             <section className="section">
