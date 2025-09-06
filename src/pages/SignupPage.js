@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StripePaymentForm from '../components/StripePaymentForm';
 import './SignupPage.css';
 
 const SignupPage = () => {
     const { t } = useTranslation('pages');
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
