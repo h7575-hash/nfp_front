@@ -92,7 +92,7 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
                 },
                 body: JSON.stringify({
                     ...userData,
-                    status: 'card_required' // カード登録前はcard_required
+                    status: 'pending' // カード登録前はpending
                 }),
             });
 
@@ -162,7 +162,7 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
                 },
                 body: JSON.stringify({
                     ...userData,
-                    status: 'card_required' // カード登録前はcard_required
+                    status: 'pending' // カード登録前はpending
                 }),
             });
 

@@ -453,7 +453,7 @@ const SignupPage = () => {
                 ip_address: ipAddress
             };
             
-            // 先にユーザーを作成（phone_verification_required状態）
+            // 先にユーザーを作成（pending状態）
             const userCreateResponse = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
@@ -461,7 +461,7 @@ const SignupPage = () => {
                 },
                 body: JSON.stringify({
                     ...userData,
-                    status: 'phone_verification_required' // 電話番号認証待ち状態
+                    status: 'pending' // 未完了状態（電話番号認証待ち）
                 }),
             });
 
@@ -478,7 +478,7 @@ const SignupPage = () => {
             setCreatedUser({
                 user_id: user_id,
                 email: userData.email,
-                status: 'phone_verification_required'
+                status: 'pending'
             });
             setShowPhoneStep(true);
             
