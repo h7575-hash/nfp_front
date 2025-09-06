@@ -292,9 +292,13 @@ const SignupPage = () => {
 
         // Google OAuth必須項目チェック
         if (!formData.purpose) newErrors.purpose = t('signup.validation.purposeRequired');
-        if (!formData.industry) newErrors.industry = t('signup.validation.industryRequired');
-        if (!formData.occupation) newErrors.occupation = t('signup.validation.occupationRequired');
         if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
+        
+        // 業種・職種チェック（ビジネスまたは両方の場合のみ必須）
+        if (formData.purpose === 'business' || formData.purpose === 'both') {
+            if (!formData.industry) newErrors.industry = t('signup.validation.industryRequired');
+            if (!formData.occupation) newErrors.occupation = t('signup.validation.occupationRequired');
+        }
         
         // ビジネス情報チェック（ビジネスまたは両方の場合）
         if (formData.purpose === 'business' || formData.purpose === 'both') {
