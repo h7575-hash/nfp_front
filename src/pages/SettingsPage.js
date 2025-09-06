@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
 import './SettingsPage.css';
 
 function SettingsPage() {
     const { t, i18n } = useTranslation(['pages', 'common']);
+    const { user, updateUser, authenticatedFetch } = useAuth();
     const [settings, setSettings] = useState({
         notifications: {
             push: true,
@@ -47,10 +49,26 @@ function SettingsPage() {
     const [subscriptionInfo, setSubscriptionInfo] = useState(null);
     const [isLoadingPayment, setIsLoadingPayment] = useState(false);
     
+    // 電話番号管理関連のstate
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phoneVerified, setPhoneVerified] = useState(false);
+    const [showPhoneForm, setShowPhoneForm] = useState(false);
+    const [phoneFormData, setPhoneFormData] = useState({
+        phone_number: '',
+        verification_code: ''
+    });
+    const [phoneVerificationStep, setPhoneVerificationStep] = useState('input'); // 'input', 'verify'
+    const [isLoadingPhone, setIsLoadingPhone] = useState(false);
+    const [phoneErrors, setPhoneErrors] = useState({});
+    
     // コンポーネント初期化時にユーザー設定を取得
     useEffect(() => {
         loadUserSettings();
-    }, []);
+        if (user) {
+            setPhoneNumber(user.phone_number || '');
+            setPhoneVerified(user.phone_verified || false);
+        }
+    }, [user]);
     
     const loadUserSettings = async () => {
         try {
@@ -288,6 +306,182 @@ function SettingsPage() {
             console.error('削除エラー:', error);
             alert(`アカウント削除に失敗しました: ${error.message}`);
         }
+    };
+
+    // 電話番号管理関数
+    const handlePhoneChange = (e) => {
+        const { name, value } = e.target;
+        setPhoneFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        // エラーをクリア
+        if (phoneErrors[name]) {
+            setPhoneErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
+
+    // 電話番号の国際フォーマットへの変換
+    const formatPhoneNumber = (phone) => {
+        let formatted = phone.trim();
+        if (formatted.startsWith('0')) {
+            formatted = '+81' + formatted.slice(1);
+        } else if (!formatted.startsWith('+')) {
+            formatted = '+81' + formatted;
+        }
+        return formatted;
+    };
+
+    // SMS認証コード送信
+    const sendPhoneVerification = async () => {
+        if (!phoneFormData.phone_number) {
+            setPhoneErrors(prev => ({ ...prev, phone_number: '電話番号を入力してください' }));
+            return;
+        }
+
+        const formattedPhone = formatPhoneNumber(phoneFormData.phone_number);
+        setIsLoadingPhone(true);
+        setPhoneErrors({});
+
+        try {
+            const response = await authenticatedFetch('/api/auth/send-phone-verification', {
+                method: 'POST',
+                body: JSON.stringify({
+                    phone_number: formattedPhone,
+                    user_id: user.user_id
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setPhoneVerificationStep('verify');
+                setPhoneFormData(prev => ({ ...prev, phone_number: formattedPhone }));
+                alert(`認証コードを ${formattedPhone} に送信しました`);
+            } else {
+                setPhoneErrors(prev => ({ 
+                    ...prev, 
+                    phone_number: result.error || '認証コードの送信に失敗しました' 
+                }));
+            }
+        } catch (error) {
+            console.error('Phone verification send error:', error);
+            setPhoneErrors(prev => ({ 
+                ...prev, 
+                phone_number: 'ネットワークエラーが発生しました' 
+            }));
+        } finally {
+            setIsLoadingPhone(false);
+        }
+    };
+
+    // 認証コードを検証
+    const verifyPhoneCode = async () => {
+        if (!phoneFormData.verification_code) {
+            setPhoneErrors(prev => ({ ...prev, verification_code: '認証コードを入力してください' }));
+            return;
+        }
+
+        setIsLoadingPhone(true);
+        setPhoneErrors({});
+
+        try {
+            const response = await authenticatedFetch('/api/auth/verify-phone', {
+                method: 'POST',
+                credentials: 'include',
+                body: JSON.stringify({
+                    verification_code: phoneFormData.verification_code,
+                    user_id: user.user_id
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // 成功時の処理
+                setPhoneNumber(phoneFormData.phone_number);
+                setPhoneVerified(true);
+                setShowPhoneForm(false);
+                setPhoneVerificationStep('input');
+                setPhoneFormData({ phone_number: '', verification_code: '' });
+                
+                // ユーザー情報を更新
+                const updatedUser = {
+                    ...user,
+                    phone_number: phoneFormData.phone_number,
+                    phone_verified: true
+                };
+                updateUser(updatedUser);
+                
+                alert('電話番号が正常に認証されました');
+            } else {
+                setPhoneErrors(prev => ({ 
+                    ...prev, 
+                    verification_code: result.error || '認証コードの検証に失敗しました' 
+                }));
+            }
+        } catch (error) {
+            console.error('Phone verification error:', error);
+            setPhoneErrors(prev => ({ 
+                ...prev, 
+                verification_code: 'ネットワークエラーが発生しました' 
+            }));
+        } finally {
+            setIsLoadingPhone(false);
+        }
+    };
+
+    // 電話番号を削除
+    const removePhoneNumber = async () => {
+        if (!window.confirm('電話番号を削除しますか？')) {
+            return;
+        }
+
+        setIsLoadingPhone(true);
+
+        try {
+            const response = await authenticatedFetch('/api/auth/remove-phone', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: user.user_id
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setPhoneNumber('');
+                setPhoneVerified(false);
+                
+                // ユーザー情報を更新
+                const updatedUser = {
+                    ...user,
+                    phone_number: null,
+                    phone_verified: false
+                };
+                updateUser(updatedUser);
+                
+                alert('電話番号を削除しました');
+            } else {
+                alert(result.error || '電話番号の削除に失敗しました');
+            }
+        } catch (error) {
+            console.error('Phone remove error:', error);
+            alert('ネットワークエラーが発生しました');
+        } finally {
+            setIsLoadingPhone(false);
+        }
+    };
+
+    // 電話番号編集をキャンセル
+    const cancelPhoneEdit = () => {
+        setShowPhoneForm(false);
+        setPhoneVerificationStep('input');
+        setPhoneFormData({ phone_number: '', verification_code: '' });
+        setPhoneErrors({});
     };
     
     const handleProfileUpdate = async (e) => {
@@ -582,6 +776,138 @@ function SettingsPage() {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    )}
+                </div>
+
+                {/* 電話番号管理セクション */}
+                <div className="settings-section">
+                    <h2 className="settings-section-title">電話番号管理</h2>
+                    
+                    {!showPhoneForm ? (
+                        <div className="phone-info">
+                            {phoneNumber ? (
+                                <div className="current-phone-info">
+                                    <div className="phone-status">
+                                        <span className="phone-number">{phoneNumber}</span>
+                                        <span className={`verification-badge ${phoneVerified ? 'verified' : 'unverified'}`}>
+                                            {phoneVerified ? '✓ 認証済み' : '未認証'}
+                                        </span>
+                                    </div>
+                                    <div className="phone-actions">
+                                        <button 
+                                            className="settings-button secondary"
+                                            onClick={() => setShowPhoneForm(true)}
+                                        >
+                                            電話番号を変更
+                                        </button>
+                                        <button 
+                                            className="settings-button danger"
+                                            onClick={removePhoneNumber}
+                                            disabled={isLoadingPhone}
+                                        >
+                                            {isLoadingPhone ? '削除中...' : '電話番号を削除'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="no-phone-info">
+                                    <p>電話番号が登録されていません</p>
+                                    <button 
+                                        className="settings-button primary"
+                                        onClick={() => setShowPhoneForm(true)}
+                                    >
+                                        電話番号を追加
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="phone-form">
+                            {phoneVerificationStep === 'input' && (
+                                <div className="phone-input-step">
+                                    <h3>電話番号の入力</h3>
+                                    <div className="form-group">
+                                        <label htmlFor="phone_number">電話番号</label>
+                                        <input
+                                            type="tel"
+                                            id="phone_number"
+                                            name="phone_number"
+                                            value={phoneFormData.phone_number}
+                                            onChange={handlePhoneChange}
+                                            placeholder="090-1234-5678"
+                                            className={`form-input ${phoneErrors.phone_number ? 'error' : ''}`}
+                                        />
+                                        {phoneErrors.phone_number && (
+                                            <span className="error-message">{phoneErrors.phone_number}</span>
+                                        )}
+                                    </div>
+                                    <div className="form-actions">
+                                        <button
+                                            type="button"
+                                            onClick={sendPhoneVerification}
+                                            disabled={isLoadingPhone || !phoneFormData.phone_number}
+                                            className="settings-button primary"
+                                        >
+                                            {isLoadingPhone ? '送信中...' : '認証コード送信'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={cancelPhoneEdit}
+                                            className="settings-button secondary"
+                                        >
+                                            キャンセル
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {phoneVerificationStep === 'verify' && (
+                                <div className="phone-verify-step">
+                                    <h3>認証コードの入力</h3>
+                                    <p>認証コードを <strong>{phoneFormData.phone_number}</strong> に送信しました</p>
+                                    <div className="form-group">
+                                        <label htmlFor="verification_code">認証コード</label>
+                                        <input
+                                            type="text"
+                                            id="verification_code"
+                                            name="verification_code"
+                                            value={phoneFormData.verification_code}
+                                            onChange={handlePhoneChange}
+                                            placeholder="6桁の認証コード"
+                                            maxLength="6"
+                                            className={`form-input ${phoneErrors.verification_code ? 'error' : ''}`}
+                                        />
+                                        {phoneErrors.verification_code && (
+                                            <span className="error-message">{phoneErrors.verification_code}</span>
+                                        )}
+                                    </div>
+                                    <div className="form-actions">
+                                        <button
+                                            type="button"
+                                            onClick={verifyPhoneCode}
+                                            disabled={isLoadingPhone || !phoneFormData.verification_code}
+                                            className="settings-button primary"
+                                        >
+                                            {isLoadingPhone ? '認証中...' : '認証する'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPhoneVerificationStep('input')}
+                                            className="settings-button secondary"
+                                        >
+                                            戻る
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={cancelPhoneEdit}
+                                            className="settings-button secondary"
+                                        >
+                                            キャンセル
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
