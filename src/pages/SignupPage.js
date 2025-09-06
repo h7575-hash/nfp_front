@@ -231,36 +231,52 @@ const SignupPage = () => {
             // デバイス情報を取得
             const { deviceId, ipAddress } = await getDeviceInfo();
 
-            // サーバーサイドGoogle OAuth登録API呼び出し
-            const response = await fetch('/auth/google', {
+            // ユーザーデータを準備（Googleアカウント情報含む）
+            const userData = {
+                email: googleUserInfo.email,
+                purpose: formData.purpose,
+                industry: formData.industry,
+                occupation: formData.occupation,
+                company_name: formData.company_name,
+                position: formData.position,
+                birth_date: formData.birth_date,
+                device_id: deviceId,
+                ip_address: ipAddress,
+                social_login: {
+                    service: 'google',
+                    token: googleUserInfo.access_token
+                }
+            };
+
+            // 先にユーザーを作成（pending状態）- 通常フローと同様
+            const userCreateResponse = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    access_token: googleUserInfo.access_token,
-                    purpose: formData.purpose,
-                    industry: formData.industry,
-                    occupation: formData.occupation,
-                    company_name: formData.company_name,
-                    position: formData.position,
-                    birth_date: formData.birth_date,
-                    device_id: deviceId,
-                    ip_address: ipAddress
-                })
+                    ...userData,
+                    status: 'pending' // 未完了状態（電話番号認証待ち）
+                }),
             });
 
-            const result = await response.json();
+            const userCreateResult = await userCreateResponse.json();
 
-            if (response.ok && result.success) {
-                // 成功メッセージを表示してホーム画面へリダイレクト
-                setSuccessMessage(t('signup.success.googleAccountCreated'));
-                setTimeout(() => {
-                    navigate('/phone-verification', { replace: true });
-                }, 2000);
-            } else {
-                throw new Error(result.error || `Registration failed (Status: ${response.status})`);
+            if (!userCreateResponse.ok) {
+                throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
             }
+
+            const user_id = userCreateResult.user_id;
+            
+            // ユーザー情報をセット（通常フローと同じように電話認証ステップへ）
+            setValidatedUserData(userData);
+            setCreatedUser({
+                user_id: user_id,
+                email: userData.email,
+                status: 'pending'
+            });
+            setShowGoogleForm(false); // Googleフォームを閉じる
+            setShowPhoneStep(true); // 電話認証ステップに移動
 
         } catch (error) {
             console.error('Google登録エラー:', error);
