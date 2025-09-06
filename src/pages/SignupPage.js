@@ -601,7 +601,7 @@ const SignupPage = () => {
                     )}
 
                     <StripePaymentForm 
-                        userData={{...validatedUserData, user_id: createdUser.user_id, existing_user: true}}
+                        userData={{...validatedUserData, user_id: createdUser.user_id}}
                         onSuccess={handlePaymentSuccess}
                         onError={handlePaymentError}
                     />
