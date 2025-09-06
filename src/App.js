@@ -9,7 +9,6 @@ import RequestPage from './pages/RequestPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import PhoneVerificationPage from './pages/PhoneVerificationPage';
 import SettingsPage from './pages/SettingsPage';
 import Sidebar from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -44,11 +43,6 @@ function App() {
                             } />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/signup" element={<SignupPage />} />
-                            <Route path="/phone-verification" element={
-                                <ProtectedRoute>
-                                    <PhoneVerificationPage />
-                                </ProtectedRoute>
-                            } />
                             <Route path="/settings" element={
                                 <ProtectedRoute>
                                     <SettingsPage />

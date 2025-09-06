@@ -508,7 +508,7 @@ const SignupPage = () => {
         console.log('Payment successful:', result);
         setSuccessMessage(result.message || 'アカウントが正常に作成されました');
         setTimeout(() => {
-            navigate('/phone-verification', { replace: true });
+            navigate('/', { replace: true });
         }, 2000);
     };
 
