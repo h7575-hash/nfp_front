@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StripePaymentForm from '../components/StripePaymentForm';
+import PhoneVerificationForm from '../components/PhoneVerificationForm';
 import './SignupPage.css';
 
 const SignupPage = () => {
@@ -27,7 +28,9 @@ const SignupPage = () => {
     const [googleUserInfo, setGoogleUserInfo] = useState(null);
     const [googleClientId, setGoogleClientId] = useState('');
     const [showPaymentStep, setShowPaymentStep] = useState(false);
+    const [showPhoneStep, setShowPhoneStep] = useState(false);
     const [validatedUserData, setValidatedUserData] = useState(null);
+    const [createdUser, setCreatedUser] = useState(null);
 
     // 設定を取得
     useEffect(() => {
@@ -98,6 +101,7 @@ const SignupPage = () => {
 
         return { deviceId, ipAddress };
     };
+
 
 
     // Google OAuth処理
@@ -434,7 +438,7 @@ const SignupPage = () => {
             // デバイス情報を取得
             const { deviceId, ipAddress } = await getDeviceInfo();
             
-            // ユーザーデータを準備して決済ステップへ
+            // ユーザーデータを準備
             const userData = {
                 email: formData.email,
                 password: formData.password,
@@ -449,8 +453,34 @@ const SignupPage = () => {
                 ip_address: ipAddress
             };
             
+            // 先にユーザーを作成（phone_verification_required状態）
+            const userCreateResponse = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...userData,
+                    status: 'phone_verification_required' // 電話番号認証待ち状態
+                }),
+            });
+
+            const userCreateResult = await userCreateResponse.json();
+
+            if (!userCreateResponse.ok) {
+                throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+            }
+
+            const user_id = userCreateResult.user_id;
+            
+            // ユーザー情報をセット
             setValidatedUserData(userData);
-            setShowPaymentStep(true);
+            setCreatedUser({
+                user_id: user_id,
+                email: userData.email,
+                status: 'phone_verification_required'
+            });
+            setShowPhoneStep(true);
             
         } catch (error) {
             console.error('フォーム処理エラー:', error);
@@ -478,15 +508,73 @@ const SignupPage = () => {
         setValidatedUserData(null);
     };
 
-    // 決済ステップから戻る
+    // 各ステップから戻る処理
     const handleBackToForm = () => {
         setShowPaymentStep(false);
+        setShowPhoneStep(false);
         setValidatedUserData(null);
+        setCreatedUser(null);
         setShowGoogleForm(false);
     };
 
+    // 電話番号認証成功時の処理
+    const handlePhoneSuccess = (result) => {
+        console.log('Phone verification successful:', result);
+        setShowPhoneStep(false);
+        setShowPaymentStep(true);
+        // ユーザー情報を更新（電話番号認証済み）
+        setCreatedUser(prev => ({
+            ...prev,
+            phone_number: result.phone_number,
+            phone_verified: true
+        }));
+    };
+
+    // 電話番号認証エラー時の処理
+    const handlePhoneError = (error) => {
+        console.error('Phone verification error:', error);
+        alert(`電話番号認証エラー: ${error}`);
+    };
+
+    // 電話番号ステップの表示
+    if (showPhoneStep && validatedUserData && createdUser) {
+        return (
+            <div className="signup-container">
+                <div className="signup-card">
+                    <div className="signup-header">
+                        <button 
+                            type="button" 
+                            onClick={handleBackToForm}
+                            className="back-button"
+                        >
+                            ← 戻る
+                        </button>
+                        <h1>電話番号認証</h1>
+                        <p>セキュリティのため、電話番号による認証を行います</p>
+                    </div>
+
+                    {/* 成功メッセージ */}
+                    {successMessage && (
+                        <div className="success-message">
+                            <div className="success-content">
+                                <span className="success-icon">✓</span>
+                                <span className="success-text">{successMessage}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <PhoneVerificationForm 
+                        userData={createdUser}
+                        onSuccess={handlePhoneSuccess}
+                        onError={handlePhoneError}
+                    />
+                </div>
+            </div>
+        );
+    }
+
     // 決済ステップの表示
-    if (showPaymentStep && validatedUserData) {
+    if (showPaymentStep && validatedUserData && createdUser) {
         return (
             <div className="signup-container">
                 <div className="signup-card">
@@ -513,7 +601,7 @@ const SignupPage = () => {
                     )}
 
                     <StripePaymentForm 
-                        userData={validatedUserData}
+                        userData={{...validatedUserData, user_id: createdUser.user_id, existing_user: true}}
                         onSuccess={handlePaymentSuccess}
                         onError={handlePaymentError}
                     />

@@ -77,25 +77,34 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
 
     // フリープラン: 2段階処理（ユーザー作成→支払い方法保存）
     const handleFreePaymentMethod = async (card) => {
-        // ステップ1: ユーザー作成（statusはpendingで作成）
-        const userCreateResponse = await fetch('/api/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...userData,
-                status: 'card_required' // カード登録前はcard_required
-            }),
-        });
+        let user_id;
+        
+        if (userData.existing_user && userData.user_id) {
+            // 既存ユーザーの場合はuser_idをそのまま使用
+            user_id = userData.user_id;
+            console.log('Using existing user_id:', user_id);
+        } else {
+            // 新規ユーザーの場合はユーザー作成
+            const userCreateResponse = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...userData,
+                    status: 'card_required' // カード登録前はcard_required
+                }),
+            });
 
-        const userCreateResult = await userCreateResponse.json();
+            const userCreateResult = await userCreateResponse.json();
 
-        if (!userCreateResponse.ok) {
-            throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+            if (!userCreateResponse.ok) {
+                throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+            }
+
+            user_id = userCreateResult.user_id;
+            console.log('Created new user_id:', user_id);
         }
-
-        const user_id = userCreateResult.user_id;
 
         // ステップ2: PaymentMethodを作成
         const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
@@ -138,25 +147,34 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
 
     // 有料プラン: 2段階処理（ユーザー作成→サブスクリプション作成）
     const handlePaidSubscription = async (card) => {
-        // ステップ1: ユーザー作成（statusはpendingで作成）
-        const userCreateResponse = await fetch('/api/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...userData,
-                status: 'card_required' // カード登録前はcard_required
-            }),
-        });
+        let user_id;
+        
+        if (userData.existing_user && userData.user_id) {
+            // 既存ユーザーの場合はuser_idをそのまま使用
+            user_id = userData.user_id;
+            console.log('Using existing user_id:', user_id);
+        } else {
+            // 新規ユーザーの場合はユーザー作成
+            const userCreateResponse = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...userData,
+                    status: 'card_required' // カード登録前はcard_required
+                }),
+            });
 
-        const userCreateResult = await userCreateResponse.json();
+            const userCreateResult = await userCreateResponse.json();
 
-        if (!userCreateResponse.ok) {
-            throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+            if (!userCreateResponse.ok) {
+                throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
+            }
+
+            user_id = userCreateResult.user_id;
+            console.log('Created new user_id:', user_id);
         }
-
-        const user_id = userCreateResult.user_id;
 
         // ステップ2: PaymentMethodを作成
         const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
