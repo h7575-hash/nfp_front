@@ -18,7 +18,6 @@ const SignupPage = () => {
         company_name: '',
         position: '',
         birth_date: '',
-        plan: 'free',
         agreeToTerms: false
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -246,7 +245,6 @@ const SignupPage = () => {
                     company_name: formData.company_name,
                     position: formData.position,
                     birth_date: formData.birth_date,
-                    plan: formData.plan,
                     device_id: deviceId,
                     ip_address: ipAddress
                 })
@@ -448,7 +446,6 @@ const SignupPage = () => {
                 company_name: formData.company_name,
                 position: formData.position,
                 birth_date: formData.birth_date,
-                plan: formData.plan,
                 device_id: deviceId,
                 ip_address: ipAddress
             };
@@ -768,54 +765,6 @@ const SignupPage = () => {
                                 </div>
                             )}
 
-                            {/* プラン選択 */}
-                            <div className="form-group">
-                                <label>{t('signup.form.plan')}</label>
-                                <div className="plan-options">
-                                    <label className="plan-option">
-                                        <input
-                                            type="radio"
-                                            name="plan"
-                                            value="unlimited"
-                                            checked={formData.plan === 'unlimited'}
-                                            onChange={handleChange}
-                                        />
-                                        <div className="plan-card">
-                                            <h3>{t('signup.plans.unlimited')}</h3>
-                                            <p>{t('signup.plans.unlimitedDescription')}</p>
-                                            <div className="price">{t('signup.plans.unlimitedPrice')}</div>
-                                        </div>
-                                    </label>
-                                    <label className="plan-option">
-                                        <input
-                                            type="radio"
-                                            name="plan"
-                                            value="plus"
-                                            checked={formData.plan === 'plus'}
-                                            onChange={handleChange}
-                                        />
-                                        <div className="plan-card">
-                                            <h3>{t('signup.plans.plus')}</h3>
-                                            <p>{t('signup.plans.plusDescription')}</p>
-                                            <div className="price">{t('signup.plans.plusPrice')}</div>
-                                        </div>
-                                    </label>
-                                    <label className="plan-option">
-                                        <input
-                                            type="radio"
-                                            name="plan"
-                                            value="free"
-                                            checked={formData.plan === 'free'}
-                                            onChange={handleChange}
-                                        />
-                                        <div className="plan-card">
-                                            <h3>{t('signup.plans.free')}</h3>
-                                            <p>{t('signup.plans.freeDescription')}</p>
-                                            <div className="price">{t('signup.plans.freePrice')}</div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
 
                             {/* 利用規約同意 */}
                             <div className="form-group">
@@ -1034,54 +983,6 @@ const SignupPage = () => {
                         </div>
                     )}
 
-                    {/* プラン選択 */}
-                    <div className="form-group">
-                        <label>{t('signup.form.plan')}</label>
-                        <div className="plan-options">
-                            <label className="plan-option">
-                                <input
-                                    type="radio"
-                                    name="plan"
-                                    value="unlimited"
-                                    checked={formData.plan === 'unlimited'}
-                                    onChange={handleChange}
-                                />
-                                <div className="plan-card">
-                                    <h3>{t('signup.plans.unlimited')}</h3>
-                                    <p>{t('signup.plans.unlimitedDescription')}</p>
-                                    <div className="price">{t('signup.plans.unlimitedPrice')}</div>
-                                </div>
-                            </label>
-                            <label className="plan-option">
-                                <input
-                                    type="radio"
-                                    name="plan"
-                                    value="plus"
-                                    checked={formData.plan === 'plus'}
-                                    onChange={handleChange}
-                                />
-                                <div className="plan-card">
-                                    <h3>{t('signup.plans.plus')}</h3>
-                                    <p>{t('signup.plans.plusDescription')}</p>
-                                    <div className="price">{t('signup.plans.plusPrice')}</div>
-                                </div>
-                            </label>
-                            <label className="plan-option">
-                                <input
-                                    type="radio"
-                                    name="plan"
-                                    value="free"
-                                    checked={formData.plan === 'free'}
-                                    onChange={handleChange}
-                                />
-                                <div className="plan-card">
-                                    <h3>{t('signup.plans.free')}</h3>
-                                    <p>{t('signup.plans.freeDescription')}</p>
-                                    <div className="price">{t('signup.plans.freePrice')}</div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
 
                     {/* 利用規約同意 */}
                     <div className="form-group">

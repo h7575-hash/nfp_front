@@ -36,12 +36,17 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
     const elements = useElements();
     const [cardComplete, setCardComplete] = useState(false);
     const [cardError, setCardError] = useState(null);
+    const [selectedPlan, setSelectedPlan] = useState('free');
 
     // デバッグ用のログ
     useEffect(() => {
         console.log('PaymentForm mounted - stripe:', stripe ? 'Ready' : 'Not ready');
         console.log('PaymentForm mounted - elements:', elements ? 'Ready' : 'Not ready');
     }, [stripe, elements]);
+
+    const handlePlanChange = (e) => {
+        setSelectedPlan(e.target.value);
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -61,7 +66,7 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
 
         try {
             // フリープランの場合は支払い方法のみ保存
-            if (userData.plan === 'free') {
+            if (selectedPlan === 'free') {
                 await handleFreePaymentMethod(card);
             } else {
                 // 有料プランの場合はサブスクリプション作成
@@ -155,7 +160,7 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
             body: JSON.stringify({
                 user_id: user_id,
                 payment_method_id: paymentMethod.id,
-                plan: userData.plan
+                plan: selectedPlan
             }),
         });
 
@@ -220,7 +225,7 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
     };
 
     const getPlanDisplayInfo = () => {
-        switch (userData.plan) {
+        switch (selectedPlan) {
             case 'plus':
                 return {
                     name: 'Plusプラン',
@@ -252,6 +257,55 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
 
     return (
         <form onSubmit={handleSubmit} className="stripe-payment-form">
+            {/* プラン選択 */}
+            <div className="plan-selection">
+                <h3>プランの選択</h3>
+                <div className="plan-options">
+                    <label className="plan-option">
+                        <input
+                            type="radio"
+                            name="plan"
+                            value="unlimited"
+                            checked={selectedPlan === 'unlimited'}
+                            onChange={handlePlanChange}
+                        />
+                        <div className="plan-card">
+                            <h3>Unlimitedプラン</h3>
+                            <p>無制限でニュース配信をお楽しみいただけます</p>
+                            <div className="price">¥3,000 + 税 / 月</div>
+                        </div>
+                    </label>
+                    <label className="plan-option">
+                        <input
+                            type="radio"
+                            name="plan"
+                            value="plus"
+                            checked={selectedPlan === 'plus'}
+                            onChange={handlePlanChange}
+                        />
+                        <div className="plan-card">
+                            <h3>Plusプラン</h3>
+                            <p>月30件まで高品質なニュースをお届けします</p>
+                            <div className="price">¥500 + 税 / 月</div>
+                        </div>
+                    </label>
+                    <label className="plan-option">
+                        <input
+                            type="radio"
+                            name="plan"
+                            value="free"
+                            checked={selectedPlan === 'free'}
+                            onChange={handlePlanChange}
+                        />
+                        <div className="plan-card">
+                            <h3>Freeプラン</h3>
+                            <p>お試しとして月5件までご利用いただけます</p>
+                            <div className="price">無料</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <div className="payment-summary">
                 <h3>お支払い情報</h3>
                 <div className="plan-summary">
@@ -305,7 +359,7 @@ const PaymentForm = ({ userData, onSuccess, onError, isLoading, setIsLoading }) 
                         処理中...
                     </>
                 ) : (
-                    userData.plan === 'free' ? 'アカウントを作成' : `${planInfo.name}を開始`
+                    selectedPlan === 'free' ? 'アカウントを作成' : `${planInfo.name}を開始`
                 )}
             </button>
         </form>
