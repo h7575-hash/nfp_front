@@ -10,7 +10,6 @@ const SignupPage = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        phone_number: '',
         purpose: '',
         industry: '',
         occupation: '',
@@ -28,11 +27,6 @@ const SignupPage = () => {
     const [googleClientId, setGoogleClientId] = useState('');
     const [showPaymentStep, setShowPaymentStep] = useState(false);
     const [validatedUserData, setValidatedUserData] = useState(null);
-    // 電話番号認証関連の状態
-    const [phoneVerificationStep, setPhoneVerificationStep] = useState('input'); // 'input', 'verify', 'verified'
-    const [verificationCode, setVerificationCode] = useState('');
-    const [verificationToken, setVerificationToken] = useState('');
-    const [phoneCodeSent, setPhoneCodeSent] = useState(false);
 
     // 設定を取得
     useEffect(() => {
@@ -104,99 +98,6 @@ const SignupPage = () => {
         return { deviceId, ipAddress };
     };
 
-    // 電話番号認証コードを送信
-    const sendPhoneVerification = async () => {
-        if (!formData.phone_number) {
-            setErrors(prev => ({ ...prev, phone_number: '電話番号を入力してください' }));
-            return;
-        }
-
-        // 国際フォーマットへの変換
-        let phoneNumber = formData.phone_number.trim();
-        if (phoneNumber.startsWith('0')) {
-            phoneNumber = '+81' + phoneNumber.slice(1);
-        } else if (!phoneNumber.startsWith('+')) {
-            phoneNumber = '+81' + phoneNumber;
-        }
-
-        setIsLoading(true);
-        try {
-            const response = await fetch('/api/auth/send-phone-verification', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    phone_number: phoneNumber
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setVerificationToken(result.debug_token); // 開発用
-                setPhoneVerificationStep('verify');
-                setPhoneCodeSent(true);
-                setSuccessMessage(`認証コードを ${phoneNumber} に送信しました`);
-                // エラーをクリア
-                setErrors(prev => ({ ...prev, phone_number: '' }));
-            } else {
-                throw new Error(result.error || '認証コードの送信に失敗しました');
-            }
-        } catch (error) {
-            console.error('Phone verification send error:', error);
-            setErrors(prev => ({ ...prev, phone_number: error.message }));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // 電話番号認証コードを検証
-    const verifyPhoneCode = async () => {
-        if (!verificationCode) {
-            setErrors(prev => ({ ...prev, verification_code: '認証コードを入力してください' }));
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const response = await fetch('/api/auth/verify-phone', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    verification_code: verificationCode,
-                    token: verificationToken
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setPhoneVerificationStep('verified');
-                setSuccessMessage('電話番号が正常に認証されました');
-                // エラーをクリア
-                setErrors(prev => ({ ...prev, verification_code: '' }));
-                
-                // フォームデータを更新（国際フォーマット）
-                let phoneNumber = formData.phone_number.trim();
-                if (phoneNumber.startsWith('0')) {
-                    phoneNumber = '+81' + phoneNumber.slice(1);
-                } else if (!phoneNumber.startsWith('+')) {
-                    phoneNumber = '+81' + phoneNumber;
-                }
-                setFormData(prev => ({ ...prev, phone_number: phoneNumber }));
-            } else {
-                throw new Error(result.error || '認証コードの検証に失敗しました');
-            }
-        } catch (error) {
-            console.error('Phone verification error:', error);
-            setErrors(prev => ({ ...prev, verification_code: error.message }));
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     // Google OAuth処理
     const handleGoogleSignup = async () => {
@@ -352,7 +253,7 @@ const SignupPage = () => {
                 // 成功メッセージを表示してホーム画面へリダイレクト
                 setSuccessMessage(t('signup.success.googleAccountCreated'));
                 setTimeout(() => {
-                    window.location.href = '/';
+                    navigate('/phone-verification', { replace: true });
                 }, 2000);
             } else {
                 throw new Error(result.error || `Registration failed (Status: ${response.status})`);
@@ -460,14 +361,9 @@ const SignupPage = () => {
         if (!formData.email) newErrors.email = t('signup.validation.emailRequired');
         if (!formData.password) newErrors.password = t('signup.validation.passwordRequired');
         if (!formData.confirmPassword) newErrors.confirmPassword = t('signup.validation.confirmPasswordRequired');
-        if (!formData.phone_number) newErrors.phone_number = '電話番号は必須です';
         if (!formData.purpose) newErrors.purpose = t('signup.validation.purposeRequired');
         if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
         
-        // 電話番号認証チェック
-        if (phoneVerificationStep !== 'verified') {
-            newErrors.phone_verification = '電話番号の認証が完了していません';
-        }
         
         // 業種・職種チェック（ビジネスまたは両方の場合のみ必須）
         if (formData.purpose === 'business' || formData.purpose === 'both') {
@@ -541,7 +437,6 @@ const SignupPage = () => {
             const userData = {
                 email: formData.email,
                 password: formData.password,
-                phone_number: formData.phone_number,
                 purpose: formData.purpose,
                 industry: formData.industry,
                 occupation: formData.occupation,
@@ -569,7 +464,7 @@ const SignupPage = () => {
         console.log('Payment successful:', result);
         setSuccessMessage(result.message || 'アカウントが正常に作成されました');
         setTimeout(() => {
-            window.location.href = '/';
+            navigate('/phone-verification', { replace: true });
         }, 2000);
     };
 
@@ -892,90 +787,6 @@ const SignupPage = () => {
                         {errors.email && <span className="error-message">{errors.email}</span>}
                     </div>
 
-                    {/* 電話番号認証 */}
-                    <div className="form-group">
-                        <label htmlFor="phone_number">電話番号 *</label>
-                        {phoneVerificationStep === 'input' && (
-                            <div className="phone-verification-input">
-                                <input
-                                    type="tel"
-                                    id="phone_number"
-                                    name="phone_number"
-                                    value={formData.phone_number}
-                                    onChange={handleChange}
-                                    placeholder="090-1234-5678"
-                                    className={`form-input ${errors.phone_number ? 'error' : ''}`}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={sendPhoneVerification}
-                                    className="btn btn-secondary phone-verify-btn"
-                                    disabled={isLoading || !formData.phone_number}
-                                >
-                                    {isLoading ? '送信中...' : '認証コード送信'}
-                                </button>
-                            </div>
-                        )}
-                        {phoneVerificationStep === 'verify' && (
-                            <div className="phone-verification-verify">
-                                <div className="verification-info">
-                                    <p>認証コードを {formData.phone_number} に送信しました</p>
-                                    <div className="verification-input-group">
-                                        <input
-                                            type="text"
-                                            value={verificationCode}
-                                            onChange={(e) => setVerificationCode(e.target.value)}
-                                            placeholder="6桁の認証コード"
-                                            maxLength="6"
-                                            className={`form-input ${errors.verification_code ? 'error' : ''}`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={verifyPhoneCode}
-                                            className="btn btn-secondary"
-                                            disabled={isLoading || !verificationCode}
-                                        >
-                                            {isLoading ? '検証中...' : '認証'}
-                                        </button>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setPhoneVerificationStep('input');
-                                            setVerificationCode('');
-                                            setPhoneCodeSent(false);
-                                        }}
-                                        className="btn-link"
-                                    >
-                                        電話番号を変更
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        {phoneVerificationStep === 'verified' && (
-                            <div className="phone-verification-verified">
-                                <div className="verification-success">
-                                    <span className="success-icon">✓</span>
-                                    <span>電話番号が認証されました: {formData.phone_number}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setPhoneVerificationStep('input');
-                                            setVerificationCode('');
-                                            setPhoneCodeSent(false);
-                                            setFormData(prev => ({ ...prev, phone_number: '' }));
-                                        }}
-                                        className="btn-link"
-                                    >
-                                        変更
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        {errors.phone_number && <span className="error-message">{errors.phone_number}</span>}
-                        {errors.verification_code && <span className="error-message">{errors.verification_code}</span>}
-                        {errors.phone_verification && <span className="error-message">{errors.phone_verification}</span>}
-                    </div>
 
                     {/* パスワード */}
                     <div className="form-row">
