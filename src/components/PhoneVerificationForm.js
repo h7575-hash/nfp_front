@@ -66,6 +66,10 @@ const PhoneVerificationForm = ({ userData, onSuccess, onError }) => {
             const result = await response.json();
 
             if (response.ok && result.success) {
+                // 認証トークンを保存
+                if (result.verification_token) {
+                    sessionStorage.setItem('verification_token', result.verification_token);
+                }
                 setPhoneVerificationStep('verify');
                 setPhoneFormData(prev => ({ ...prev, phone_number: formattedPhone }));
                 setSuccessMessage(`認証コードを ${formattedPhone} に送信しました`);
@@ -97,6 +101,13 @@ const PhoneVerificationForm = ({ userData, onSuccess, onError }) => {
         setErrors({});
 
         try {
+            // 保存された認証トークンを取得
+            const verificationToken = sessionStorage.getItem('verification_token');
+            if (!verificationToken) {
+                setErrors(prev => ({ ...prev, verification_code: '認証セッションが見つかりません。再度SMS送信をお試しください。' }));
+                return;
+            }
+
             const response = await fetch('/api/auth/verify-phone', {
                 method: 'POST',
                 headers: {
@@ -105,6 +116,7 @@ const PhoneVerificationForm = ({ userData, onSuccess, onError }) => {
                 credentials: 'include',
                 body: JSON.stringify({
                     verification_code: phoneFormData.verification_code,
+                    verification_token: verificationToken,
                     user_id: userData.user_id
                 })
             });
@@ -112,6 +124,9 @@ const PhoneVerificationForm = ({ userData, onSuccess, onError }) => {
             const result = await response.json();
 
             if (response.ok && result.success) {
+                // 認証成功時にトークンを削除（セキュリティ）
+                sessionStorage.removeItem('verification_token');
+                
                 onSuccess({
                     type: 'phone_verification',
                     message: '電話番号が正常に認証されました',
