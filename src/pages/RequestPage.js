@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const RequestPage = () => {
+    const { t } = useTranslation(['pages', 'common']);
     const [requestData, setRequestData] = useState({
         request: '',
         request_type: 'search', // 'search' or 'site'
@@ -26,7 +28,7 @@ const RequestPage = () => {
             const response = await axios.post('/api/requests/', requestData);
             console.log('Request created:', response.data);
             
-            setSuccessMessage('リクエストの登録が完了しました！条件に合致する情報が見つかり次第、通知いたします。');
+            setSuccessMessage(t('register.success.message'));
             
             // フォームをリセット
             setRequestData({
@@ -47,9 +49,9 @@ const RequestPage = () => {
     return (
         <div className="page-container">
             <div className="page-header">
-                <h1 className="page-title">情報監視リクエストの登録</h1>
+                <h1 className="page-title">{t('register.title')}</h1>
                 <p className="page-subtitle">
-                    特定の情報やニュースを監視し、条件に合致した場合に通知を受け取れます
+                    {t('register.subtitle')}
                 </p>
             </div>
 
@@ -65,30 +67,30 @@ const RequestPage = () => {
             <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
                 <div className="card mb-6">
                     <div className="card-header">
-                        <h2 className="card-title">監視設定</h2>
-                        <p className="card-subtitle">どのような情報を監視するかを設定してください</p>
+                        <h2 className="card-title">チェック設定</h2>
+                        <p className="card-subtitle">どのような情報をチェックするかを設定してください</p>
                     </div>
                     <div className="card-body">
                         <div className="form-group">
-                            <label>監視タイプ *</label>
+                            <label>{t('register.form.checkMethod')} *</label>
                             <select 
                                 name="request_type" 
                                 value={requestData.request_type} 
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="search">検索監視（キーワードベース）</option>
-                                <option value="site">特定サイト監視</option>
+                                <option value="search">{t('register.form.options.search')}</option>
+                                <option value="site">{t('register.form.options.site')}</option>
                             </select>
                             <div className="form-help-text">
-                                <p><strong>検索監視：</strong>Tavilyを使って特定のキーワードで定期的に検索し、新しい情報を監視</p>
-                                <p><strong>特定サイト監視：</strong>指定したWebサイトの更新を監視</p>
+                                <p><strong>{t('register.form.options.search')}：</strong>{t('register.form.helpText.searchMethod')}</p>
+                                <p><strong>{t('register.form.options.site')}：</strong>{t('register.form.helpText.siteMethod')}</p>
                             </div>
                         </div>
 
                         <div className="form-group">
                             <label>
-                                {requestData.request_type === 'search' ? '検索クエリ *' : '監視サイトURL *'}
+                                {requestData.request_type === 'search' ? t('register.form.searchKeyword') + ' *' : t('register.form.siteUrl') + ' *'}
                             </label>
                             <input 
                                 type={requestData.request_type === 'site' ? 'url' : 'text'}
@@ -97,37 +99,37 @@ const RequestPage = () => {
                                 onChange={handleChange}
                                 placeholder={
                                     requestData.request_type === 'search' 
-                                        ? '例: ChatGPT 新機能 2024' 
-                                        : '例: https://openai.com/blog'
+                                        ? t('register.form.placeholders.searchKeyword') 
+                                        : t('register.form.placeholders.siteUrl')
                                 }
                                 required 
                             />
                             <div className="form-help-text">
                                 {requestData.request_type === 'search' ? (
-                                    <p>監視したいキーワードやトピックを入力してください。複数のキーワードはスペースで区切ってください。</p>
+                                    <p>{t('register.form.helpText.searchInput')}</p>
                                 ) : (
-                                    <p>監視したいWebサイトのURLを入力してください。そのサイトの更新を定期的にチェックします。</p>
+                                    <p>{t('register.form.helpText.siteInput')}</p>
                                 )}
                             </div>
                         </div>
                         
                         <div className="form-group">
-                            <label>通知条件 *</label>
+                            <label>{t('register.form.notificationContent')} *</label>
                             <textarea 
                                 name="request" 
                                 value={requestData.request} 
                                 onChange={handleChange}
-                                placeholder="例: ChatGPTの新しいプラグインや機能が発表された場合に通知してください。特にAPI関連の更新に興味があります。"
+                                placeholder={t('register.form.placeholders.notificationContent')}
                                 rows={6}
                                 required 
                                 style={{ minHeight: '150px' }}
                             />
                             <div className="form-help-text">
-                                <p>どのような条件で通知を受け取りたいかを詳しく記入してください：</p>
+                                <p>{t('register.form.helpText.notificationDetails')}</p>
                                 <ul>
-                                    <li>特に注目したいキーワードや内容</li>
-                                    <li>除外したい情報（ノイズを減らすため）</li>
-                                    <li>通知の優先度や緊急度</li>
+                                    <li>{t('register.form.guidelines.keywords')}</li>
+                                    <li>{t('register.form.guidelines.exclude')}</li>
+                                    <li>{t('register.form.guidelines.urgency')}</li>
                                 </ul>
                             </div>
                         </div>
@@ -139,14 +141,14 @@ const RequestPage = () => {
                         {isLoading ? (
                             <>
                                 <div className="spinner"></div>
-                                登録中...
+                                {t('register.form.submitting')}
                             </>
                         ) : (
-                            '監視リクエストを登録する'
+                            t('register.form.submit')
                         )}
                     </button>
                     <p className="text-secondary mt-4" style={{ fontSize: '0.875rem' }}>
-                        登録後、AIが定期的に情報をチェックし、条件に合致する情報が見つかった場合にメールで通知します。
+                        {t('register.footer.description')}
                     </p>
                 </div>
             </form>

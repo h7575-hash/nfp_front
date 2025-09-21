@@ -47,14 +47,42 @@
     }
   },
   "register": {
-    "title": "課題登録",
-    "subtitle": "新しい課題を登録してください",
+    "title": "ニュースチェック設定",
+    "subtitle": "気になる情報やニュースをチェックして、新しい情報が見つかったら通知でお知らせします",
     "form": {
-      "problemTitle": "課題タイトル",
-      "problemDescription": "課題の詳細",
-      "category": "カテゴリー",
-      "priority": "優先度",
-      "submit": "登録する"
+      "checkMethod": "チェック方法",
+      "searchKeyword": "検索キーワード",
+      "siteUrl": "チェックするサイトURL",
+      "notificationContent": "お知らせしてほしい内容",
+      "submit": "ニュースチェック設定を登録する",
+      "submitting": "登録中...",
+      "options": {
+        "search": "キーワードでチェック",
+        "site": "特定サイトをチェック"
+      },
+      "placeholders": {
+        "searchKeyword": "例: ChatGPT 新機能 2024",
+        "siteUrl": "例: https://openai.com/blog",
+        "notificationContent": "例: ChatGPTの新しいプラグインや機能が発表されたらお知らせしてください。特にAPI関連の更新に興味があります。"
+      },
+      "helpText": {
+        "searchMethod": "特定のキーワードで定期的に検索して、新しい情報をお探しします",
+        "siteMethod": "指定したWebサイトの更新情報をお探しします",
+        "searchInput": "チェックしたいキーワードやトピックを入力してください。複数のキーワードはスペースで区切ってください。",
+        "siteInput": "チェックしたいWebサイトのURLを入力してください。そのサイトの更新を定期的にチェックします。",
+        "notificationDetails": "どのような内容をお知らせしてほしいか詳しく記入してください："
+      },
+      "guidelines": {
+        "keywords": "特に気になるキーワードや内容",
+        "exclude": "お知らせ不要な情報があれば記入",
+        "urgency": "急いで知りたい情報かどうか"
+      }
+    },
+    "success": {
+      "message": "ニュースチェック設定が完了しました！気になる情報が見つかったらお知らせします。"
+    },
+    "footer": {
+      "description": "登録後、AIが定期的に情報をチェックし、気になる情報が見つかったらメールでお知らせします。"
     }
   },
   "login": {
