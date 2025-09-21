@@ -54,6 +54,10 @@ function SettingsPage() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [phoneVerified, setPhoneVerified] = useState(false);
     const [showPhoneForm, setShowPhoneForm] = useState(false);
+    const [isLoadingPhone, setIsLoadingPhone] = useState(false);
+    const [phoneVerificationStep, setPhoneVerificationStep] = useState('input');
+    const [phoneFormData, setPhoneFormData] = useState({ phone_number: '', verification_code: '' });
+    const [phoneErrors, setPhoneErrors] = useState({});
     
     // コンポーネント初期化時にユーザー設定を取得
     useEffect(() => {
