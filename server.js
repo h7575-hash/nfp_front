@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-const BACKEND_URL = 'https://newsdog-backend-1072071838370.asia-northeast1.run.app';
+const BACKEND_URL = 'https://newsdog-backend-4fxwjqc3ha-an.a.run.app';
 
 // Google Auth Library の初期化
 // targetAudience を明示的に指定
