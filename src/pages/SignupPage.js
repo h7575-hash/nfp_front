@@ -248,15 +248,23 @@ const SignupPage = () => {
                 }
             };
 
-            // 先にユーザーを作成（pending状態）- 通常フローと同様
-            const userCreateResponse = await fetch('/api/users', {
+            // Googleユーザーを作成（OAuth専用エンドポイント）
+            const userCreateResponse = await fetch('/api/users/oauth/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    ...userData,
-                    status: 'pending' // 未完了状態（電話番号認証待ち）
+                    access_token: googleUserInfo.access_token,
+                    purpose: formData.purpose,
+                    industry: formData.industry,
+                    occupation: formData.occupation,
+                    company_name: formData.company_name,
+                    position: formData.position,
+                    birth_date: formData.birth_date,
+                    device_id: userData.device_id,
+                    ip_address: userData.ip_address,
+                    plan: 'free'
                 }),
             });
 
