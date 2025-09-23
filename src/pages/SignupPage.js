@@ -249,7 +249,7 @@ const SignupPage = () => {
             };
 
             // Googleユーザーを作成（OAuth専用エンドポイント）
-            const userCreateResponse = await fetch('/api/users/oauth/google', {
+            const userCreateResponse = await fetch('/api/users/register-google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

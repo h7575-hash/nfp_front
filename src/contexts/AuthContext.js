@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         try {
             setLoading(true);
             
-            const response = await fetch('/api/auth/google-login', {
+            const response = await fetch('/api/auth/login-google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
