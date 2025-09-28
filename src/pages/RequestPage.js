@@ -20,10 +20,39 @@ const RequestPage = () => {
     const fetchRequests = async () => {
         try {
             setIsLoadingList(true);
-            const response = await axios.get('/api/requests/', {
-                params: { user_id: requestData.user_id }
-            });
-            setRequests(response.data);
+
+            // URL監視リクエストと検索リクエストを並行取得
+            const [urlResponse, searchResponse] = await Promise.all([
+                axios.get('/api/url-requests/', {
+                    params: { user_id: requestData.user_id }
+                }),
+                axios.get('/api/search-requests/', {
+                    params: { user_id: requestData.user_id }
+                })
+            ]);
+
+            // データを統合し、タイプを追加
+            const urlRequests = (urlResponse.data.data || []).map(req => ({
+                ...req,
+                request_type: 'site',
+                id: req.monitor_id,
+                search_obj: req.url,
+                is_active: req.status === 'active'
+            }));
+
+            const searchRequests = (searchResponse.data.data || []).map(req => ({
+                ...req,
+                request_type: 'search',
+                id: req.search_id,
+                search_obj: req.search_query,
+                is_active: req.status === 'active'
+            }));
+
+            // 作成日時でソート（新しい順）
+            const allRequests = [...urlRequests, ...searchRequests]
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            setRequests(allRequests);
         } catch (error) {
             console.error('Error fetching requests:', error);
         } finally {
@@ -44,11 +73,27 @@ const RequestPage = () => {
         e.preventDefault();
         setIsLoading(true);
         setSuccessMessage('');
-        
+
         try {
-            const response = await axios.post('/api/requests/', requestData);
+            let response;
+
+            if (requestData.request_type === 'search') {
+                // 検索リクエストの作成
+                response = await axios.post('/api/search-requests/', {
+                    user_id: requestData.user_id,
+                    request: requestData.request,
+                    search_query: requestData.search_obj
+                });
+            } else {
+                // URL監視リクエストの作成
+                response = await axios.post('/api/url-requests/', {
+                    user_id: requestData.user_id,
+                    request: requestData.request,
+                    url: requestData.search_obj
+                });
+            }
+
             console.log('Request created:', response.data);
-            
             setSuccessMessage(t('register.success.message'));
 
             // フォームをリセット
@@ -71,13 +116,21 @@ const RequestPage = () => {
     };
 
     // リクエストの削除
-    const handleDeleteRequest = async (requestId) => {
+    const handleDeleteRequest = async (request) => {
         if (!window.confirm('この設定を削除してもよろしいですか？')) {
             return;
         }
 
         try {
-            await axios.delete(`/api/requests/${requestId}/`);
+            if (request.request_type === 'search') {
+                await axios.delete('/api/search-requests/', {
+                    data: { search_id: request.id }
+                });
+            } else {
+                await axios.delete('/api/url-requests/', {
+                    data: { monitor_id: request.id }
+                });
+            }
             fetchRequests();
         } catch (error) {
             console.error('Error deleting request:', error);
@@ -86,11 +139,21 @@ const RequestPage = () => {
     };
 
     // リクエストの有効/無効切替
-    const handleToggleRequest = async (requestId, currentStatus) => {
+    const handleToggleRequest = async (request, currentStatus) => {
         try {
-            await axios.patch(`/api/requests/${requestId}/`, {
-                is_active: !currentStatus
-            });
+            const newStatus = currentStatus ? 'inactive' : 'active';
+
+            if (request.request_type === 'search') {
+                await axios.put('/api/search-requests/', {
+                    search_id: request.id,
+                    status: newStatus
+                });
+            } else {
+                await axios.put('/api/url-requests/', {
+                    monitor_id: request.id,
+                    status: newStatus
+                });
+            }
             fetchRequests();
         } catch (error) {
             console.error('Error toggling request:', error);
@@ -161,7 +224,7 @@ const RequestPage = () => {
                                         <button
                                             type="button"
                                             className={`btn ${request.is_active ? 'btn-warning' : 'btn-success'}`}
-                                            onClick={() => handleToggleRequest(request.id, request.is_active)}
+                                            onClick={() => handleToggleRequest(request, request.is_active)}
                                             title={t('register.list.table.actions.toggle')}
                                         >
                                             {request.is_active ? '停止' : '開始'}
@@ -169,7 +232,7 @@ const RequestPage = () => {
                                         <button
                                             type="button"
                                             className="btn btn-danger"
-                                            onClick={() => handleDeleteRequest(request.id)}
+                                            onClick={() => handleDeleteRequest(request)}
                                             title={t('register.list.table.actions.delete')}
                                         >
                                             削除
