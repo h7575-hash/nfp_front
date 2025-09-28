@@ -2,22 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StripePaymentForm from '../components/StripePaymentForm';
-import PhoneVerificationForm from '../components/PhoneVerificationForm';
 import './SignupPage.css';
 
 const SignupPage = () => {
     const { t } = useTranslation('pages');
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-        confirmPassword: '',
         purpose: '',
         industry: '',
         occupation: '',
-        company_name: '',
         position: '',
-        birth_date: '',
+        birth_year: '',
         agreeToTerms: false
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +22,6 @@ const SignupPage = () => {
     const [googleUserInfo, setGoogleUserInfo] = useState(null);
     const [googleClientId, setGoogleClientId] = useState('');
     const [showPaymentStep, setShowPaymentStep] = useState(false);
-    const [showPhoneStep, setShowPhoneStep] = useState(false);
     const [validatedUserData, setValidatedUserData] = useState(null);
     const [createdUser, setCreatedUser] = useState(null);
 
@@ -237,9 +231,8 @@ const SignupPage = () => {
                 purpose: formData.purpose,
                 industry: formData.industry,
                 occupation: formData.occupation,
-                company_name: formData.company_name,
                 position: formData.position,
-                birth_date: formData.birth_date,
+                birth_year: formData.birth_year,
                 device_id: deviceId,
                 ip_address: ipAddress,
                 social_login: {
@@ -259,9 +252,8 @@ const SignupPage = () => {
                     purpose: formData.purpose,
                     industry: formData.industry,
                     occupation: formData.occupation,
-                    company_name: formData.company_name,
-                    position: formData.position,
-                    birth_date: formData.birth_date,
+                        position: formData.position,
+                    birth_year: formData.birth_year,
                     device_id: userData.device_id,
                     ip_address: userData.ip_address,
                     plan: 'free'
@@ -284,7 +276,7 @@ const SignupPage = () => {
                 status: 'pending'
             });
             setShowGoogleForm(false); // Googleフォームを閉じる
-            setShowPhoneStep(true); // 電話認証ステップに移動
+            setShowPaymentStep(true); // 決済ステップに移動
 
         } catch (error) {
             console.error('Google登録エラー:', error);
@@ -300,7 +292,7 @@ const SignupPage = () => {
 
         // Google OAuth必須項目チェック
         if (!formData.purpose) newErrors.purpose = t('signup.validation.purposeRequired');
-        if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
+        if (!formData.birth_year) newErrors.birth_year = '生年は必須です';
         
         // 業種・職種チェック（ビジネスまたは両方の場合のみ必須）
         if (formData.purpose === 'business' || formData.purpose === 'both') {
@@ -310,16 +302,17 @@ const SignupPage = () => {
         
         // ビジネス情報チェック（ビジネスまたは両方の場合）
         if (formData.purpose === 'business' || formData.purpose === 'both') {
-            if (!formData.company_name) newErrors.company_name = '会社名は必須です';
             if (!formData.position) newErrors.position = '役職は必須です';
         }
         
-        if (formData.birth_date) {
-            const birthDate = new Date(formData.birth_date);
-            const today = new Date();
-            
-            if (birthDate > today) {
-                newErrors.birth_date = t('signup.validation.futureDateNotAllowed');
+        if (formData.birth_year) {
+            const currentYear = new Date().getFullYear();
+            const birthYear = parseInt(formData.birth_year);
+
+            if (birthYear > currentYear) {
+                newErrors.birth_year = '未来の年は選択できません';
+            } else if (birthYear < 1900) {
+                newErrors.birth_year = '有効な年を入力してください';
             }
         }
 
@@ -388,12 +381,9 @@ const SignupPage = () => {
     const validateForm = () => {
         const newErrors = {};
 
-        // 必須項目チェック
-        if (!formData.email) newErrors.email = t('signup.validation.emailRequired');
-        if (!formData.password) newErrors.password = t('signup.validation.passwordRequired');
-        if (!formData.confirmPassword) newErrors.confirmPassword = t('signup.validation.confirmPasswordRequired');
+        // Google OAuth必須項目チェック（統合）
         if (!formData.purpose) newErrors.purpose = t('signup.validation.purposeRequired');
-        if (!formData.birth_date) newErrors.birth_date = t('signup.validation.birthDateRequired');
+        if (!formData.birth_year) newErrors.birth_year = '生年は必須です';
         
         
         // 業種・職種チェック（ビジネスまたは両方の場合のみ必須）
@@ -404,41 +394,20 @@ const SignupPage = () => {
         
         // ビジネス情報チェック（ビジネスまたは両方の場合）
         if (formData.purpose === 'business' || formData.purpose === 'both') {
-            if (!formData.company_name) newErrors.company_name = '会社名は必須です';
             if (!formData.position) newErrors.position = '役職は必須です';
         }
-        if (formData.birth_date) {
-            const birthDate = new Date(formData.birth_date);
-            const today = new Date();
-            
-            if (birthDate > today) {
-                newErrors.birth_date = t('signup.validation.futureDateNotAllowed');
+        if (formData.birth_year) {
+            const currentYear = new Date().getFullYear();
+            const birthYear = parseInt(formData.birth_year);
+
+            if (birthYear > currentYear) {
+                newErrors.birth_year = '未来の年は選択できません';
+            } else if (birthYear < 1900) {
+                newErrors.birth_year = '有効な年を入力してください';
             }
         }
 
-        // パスワード一致チェック
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = t('signup.validation.passwordMismatch');
-        }
 
-        // パスワード長チェック
-        if (formData.password && formData.password.length < 8) {
-            newErrors.password = t('signup.validation.passwordMinLength');
-        }
-
-        // メールフォーマットチェック
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (formData.email && !emailRegex.test(formData.email)) {
-            newErrors.email = t('signup.validation.invalidEmail');
-        }
-
-        // 電話番号フォーマットチェック
-        if (formData.phone_number) {
-            const phoneRegex = /^(\+81|0)?[0-9\-]{9,11}$/;
-            if (!phoneRegex.test(formData.phone_number.replace(/[\-\s]/g, ''))) {
-                newErrors.phone_number = '有効な電話番号を入力してください';
-            }
-        }
 
         // 利用規約同意チェック
         if (!formData.agreeToTerms) {
@@ -449,71 +418,6 @@ const SignupPage = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validateForm()) {
-            return;
-        }
-
-        setIsLoading(true);
-        
-        try {
-            console.log('ユーザー登録処理 - バリデーション完了:', formData);
-            
-            // デバイス情報を取得
-            const { deviceId, ipAddress } = await getDeviceInfo();
-            
-            // ユーザーデータを準備
-            const userData = {
-                email: formData.email,
-                password: formData.password,
-                purpose: formData.purpose,
-                industry: formData.industry,
-                occupation: formData.occupation,
-                company_name: formData.company_name,
-                position: formData.position,
-                birth_date: formData.birth_date,
-                device_id: deviceId,
-                ip_address: ipAddress
-            };
-            
-            // 先にユーザーを作成（pending状態）
-            const userCreateResponse = await fetch('/api/users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...userData,
-                    status: 'pending' // 未完了状態（電話番号認証待ち）
-                }),
-            });
-
-            const userCreateResult = await userCreateResponse.json();
-
-            if (!userCreateResponse.ok) {
-                throw new Error(userCreateResult.error || 'ユーザー作成に失敗しました');
-            }
-
-            const user_id = userCreateResult.user_id;
-            
-            // ユーザー情報をセット
-            setValidatedUserData(userData);
-            setCreatedUser({
-                user_id: user_id,
-                email: userData.email,
-                status: 'pending'
-            });
-            setShowPhoneStep(true);
-            
-        } catch (error) {
-            console.error('フォーム処理エラー:', error);
-            alert(`${t('signup.errors.registrationFailed')}: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     // 決済成功時の処理
     const handlePaymentSuccess = (result) => {
@@ -536,67 +440,12 @@ const SignupPage = () => {
     // 各ステップから戻る処理
     const handleBackToForm = () => {
         setShowPaymentStep(false);
-        setShowPhoneStep(false);
         setValidatedUserData(null);
         setCreatedUser(null);
         setShowGoogleForm(false);
     };
 
-    // 電話番号認証成功時の処理
-    const handlePhoneSuccess = (result) => {
-        console.log('Phone verification successful:', result);
-        setShowPhoneStep(false);
-        setShowPaymentStep(true);
-        // ユーザー情報を更新（電話番号認証済み）
-        setCreatedUser(prev => ({
-            ...prev,
-            phone_number: result.phone_number,
-            phone_verified: true
-        }));
-    };
 
-    // 電話番号認証エラー時の処理
-    const handlePhoneError = (error) => {
-        console.error('Phone verification error:', error);
-        alert(`電話番号認証エラー: ${error}`);
-    };
-
-    // 電話番号ステップの表示
-    if (showPhoneStep && validatedUserData && createdUser) {
-        return (
-            <div className="signup-container">
-                <div className="signup-card">
-                    <div className="signup-header">
-                        <button 
-                            type="button" 
-                            onClick={handleBackToForm}
-                            className="back-button"
-                        >
-                            ← 戻る
-                        </button>
-                        <h1>電話番号認証</h1>
-                        <p>セキュリティのため、電話番号による認証を行います</p>
-                    </div>
-
-                    {/* 成功メッセージ */}
-                    {successMessage && (
-                        <div className="success-message">
-                            <div className="success-content">
-                                <span className="success-icon">✓</span>
-                                <span className="success-text">{successMessage}</span>
-                            </div>
-                        </div>
-                    )}
-
-                    <PhoneVerificationForm 
-                        userData={createdUser}
-                        onSuccess={handlePhoneSuccess}
-                        onError={handlePhoneError}
-                    />
-                </div>
-            </div>
-        );
-    }
 
     // 決済ステップの表示
     if (showPaymentStep && validatedUserData && createdUser) {
@@ -666,20 +515,23 @@ const SignupPage = () => {
                         </div>
 
                         <form onSubmit={handleGoogleFormSubmit} className="signup-form">
-                            {/* 生年月日 */}
+                            {/* 生年 */}
                             <div className="form-group">
-                                <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
-                                <input
-                                    type="date"
-                                    id="birth_date"
-                                    name="birth_date"
-                                    value={formData.birth_date}
+                                <label htmlFor="birth_year">生年 *</label>
+                                <select
+                                    id="birth_year"
+                                    name="birth_year"
+                                    value={formData.birth_year}
                                     onChange={handleChange}
-                                    defaultValue="2020-01-01"
-                                    max={new Date().toISOString().split('T')[0]}
-                                    className={`form-input ${errors.birth_date ? 'error' : ''}`}
-                                />
-                                {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
+                                    className={`form-input ${errors.birth_year ? 'error' : ''}`}
+                                >
+                                    <option value="">年を選択してください</option>
+                                    {Array.from({length: 75}, (_, i) => {
+                                        const year = new Date().getFullYear() - i;
+                                        return <option key={year} value={year}>{year}年</option>
+                                    })}
+                                </select>
+                                {errors.birth_year && <span className="error-message">{errors.birth_year}</span>}
                             </div>
 
                             {/* 利用目的 */}
@@ -748,19 +600,6 @@ const SignupPage = () => {
                             {(formData.purpose === 'business' || formData.purpose === 'both') && (
                                 <div className="business-fields">
                                     <div className="form-row">
-                                        <div className="form-group">
-                                            <label htmlFor="company_name">会社名 *</label>
-                                            <input
-                                                type="text"
-                                                id="company_name"
-                                                name="company_name"
-                                                value={formData.company_name}
-                                                onChange={handleChange}
-                                                className={`form-input ${errors.company_name ? 'error' : ''}`}
-                                                placeholder="株式会社○○"
-                                            />
-                                            {errors.company_name && <span className="error-message">{errors.company_name}</span>}
-                                        </div>
                                         <div className="form-group">
                                             <label htmlFor="position">役職 *</label>
                                             <select
@@ -836,241 +675,48 @@ const SignupPage = () => {
                         </form>
                     </div>
                 ) : (
-                    // 通常の登録フォーム
-                    <form onSubmit={handleSubmit} className="signup-form">
-                    {/* メールアドレス */}
-                    <div className="form-group">
-                        <label htmlFor="email">{t('signup.form.email')} *</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder={t('signup.form.emailPlaceholder')}
-                            className={`form-input ${errors.email ? 'error' : ''}`}
-                        />
-                        {errors.email && <span className="error-message">{errors.email}</span>}
-                    </div>
-
-
-                    {/* パスワード */}
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label htmlFor="password">{t('signup.form.password')} *</label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder={t('signup.form.passwordPlaceholder')}
-                                className={`form-input ${errors.password ? 'error' : ''}`}
-                            />
-                            {errors.password && <span className="error-message">{errors.password}</span>}
+                    // ソーシャルログイン専用
+                    <div className="social-signup-only">
+                        <div className="social-signup-info">
+                            <h3>ソーシャルログインでアカウント作成</h3>
+                            <p>プライバシー保護のため、個人情報を含まないメールアドレスをご利用ください。</p>
+                            <div className="privacy-note">
+                                <small>
+                                    推奨: user.business.2024@gmail.com<br/>
+                                    非推奨: yamada.taro.1990@gmail.com
+                                </small>
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="confirmPassword">{t('signup.form.confirmPassword')} *</label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                placeholder={t('signup.form.confirmPasswordPlaceholder')}
-                                className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-                            />
-                            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-                        </div>
-                    </div>
 
-                    {/* 生年月日 */}
-                    <div className="form-group">
-                        <label htmlFor="birth_date">{t('signup.form.birthDate')} *</label>
-                        <input
-                            type="date"
-                            id="birth_date"
-                            name="birth_date"
-                            value={formData.birth_date}
-                            onChange={handleChange}
-                            defaultValue="2020-01-01"
-                            max={new Date().toISOString().split('T')[0]}
-                            className={`form-input ${errors.birth_date ? 'error' : ''}`}
-                        />
-                        {errors.birth_date && <span className="error-message">{errors.birth_date}</span>}
-                    </div>
-
-                    {/* 利用目的 */}
-                    <div className="form-group">
-                        <label htmlFor="purpose">{t('signup.form.purpose')} *</label>
-                        <select
-                            id="purpose"
-                            name="purpose"
-                            value={formData.purpose}
-                            onChange={handleChange}
-                            className={`form-input ${errors.purpose ? 'error' : ''}`}
+                        <button
+                            type="button"
+                            className={`btn btn-google google-signin-btn large ${isLoading ? 'loading' : ''}`}
+                            onClick={handleGoogleSignup}
+                            disabled={isLoading}
                         >
-                            <option value="">{t('signup.form.selectPlaceholder')}</option>
-                            {purposeOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.purpose && <span className="error-message">{errors.purpose}</span>}
-                    </div>
+                            <svg className="google-icon" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Googleでアカウント作成
+                        </button>
 
-                    {/* 業種・職種（ビジネスまたは両方の場合のみ表示） */}
-                    {(formData.purpose === 'business' || formData.purpose === 'both') && (
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="industry">{t('signup.form.industry')} *</label>
-                                <select
-                                    id="industry"
-                                    name="industry"
-                                    value={formData.industry}
-                                    onChange={handleChange}
-                                    className={`form-input ${errors.industry ? 'error' : ''}`}
-                                >
-                                    <option value="">{t('signup.form.selectPlaceholder')}</option>
-                                    {industryOptions.map(option => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.industry && <span className="error-message">{errors.industry}</span>}
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="occupation">{t('signup.form.occupation')} *</label>
-                                <select
-                                    id="occupation"
-                                    name="occupation"
-                                    value={formData.occupation}
-                                    onChange={handleChange}
-                                    className={`form-input ${errors.occupation ? 'error' : ''}`}
-                                >
-                                    <option value="">{t('signup.form.selectPlaceholder')}</option>
-                                    {occupationOptions.map(option => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.occupation && <span className="error-message">{errors.occupation}</span>}
+                        <div className="future-social-options">
+                            <p className="coming-soon">今後対応予定:</p>
+                            <div className="social-buttons-disabled">
+                                <button className="btn btn-line disabled" disabled>
+                                    <span className="line-icon">LINE</span>
+                                    LINEログイン（準備中）
+                                </button>
+                                <button className="btn btn-apple disabled" disabled>
+                                    <span className="apple-icon">🍎</span>
+                                    Appleログイン（準備中）
+                                </button>
                             </div>
                         </div>
-                    )}
-
-                    {/* ビジネス情報（ビジネスまたは両方の場合のみ表示） */}
-                    {(formData.purpose === 'business' || formData.purpose === 'both') && (
-                        <div className="business-fields">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label htmlFor="company_name">会社名 *</label>
-                                    <input
-                                        type="text"
-                                        id="company_name"
-                                        name="company_name"
-                                        value={formData.company_name}
-                                        onChange={handleChange}
-                                        className={`form-input ${errors.company_name ? 'error' : ''}`}
-                                        placeholder="株式会社○○"
-                                    />
-                                    {errors.company_name && <span className="error-message">{errors.company_name}</span>}
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="position">役職 *</label>
-                                    <select
-                                        id="position"
-                                        name="position"
-                                        value={formData.position}
-                                        onChange={handleChange}
-                                        className={`form-input ${errors.position ? 'error' : ''}`}
-                                    >
-                                        <option value="">選択してください</option>
-                                        <option value="代表取締役">代表取締役</option>
-                                        <option value="取締役">取締役</option>
-                                        <option value="執行役員">執行役員</option>
-                                        <option value="部長">部長</option>
-                                        <option value="課長">課長</option>
-                                        <option value="係長">係長</option>
-                                        <option value="主任">主任</option>
-                                        <option value="チームリーダー">チームリーダー</option>
-                                        <option value="マネージャー">マネージャー</option>
-                                        <option value="一般社員">一般社員</option>
-                                        <option value="契約社員">契約社員</option>
-                                        <option value="派遣社員">派遣社員</option>
-                                        <option value="アルバイト・パート">アルバイト・パート</option>
-                                        <option value="インターン">インターン</option>
-                                        <option value="その他">その他</option>
-                                    </select>
-                                    {errors.position && <span className="error-message">{errors.position}</span>}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-
-                    {/* 利用規約同意 */}
-                    <div className="form-group">
-                        <label className="checkbox-label">
-                            <input
-                                type="checkbox"
-                                name="agreeToTerms"
-                                checked={formData.agreeToTerms}
-                                onChange={handleChange}
-                                className={errors.agreeToTerms ? 'error' : ''}
-                            />
-                            <span className="checkmark"></span>
-                            <span className="checkbox-text">
-                                {t('signup.form.termsAgree')}
-                                <a href="https://sage-metal-8c6.notion.site/25913b91bf6c800dae0bccec86de54de" target="_blank" rel="noopener noreferrer" className="terms-link">
-                                    {t('signup.form.termsLink')}
-                                </a>
-                                {t('signup.form.and')}
-                                <a href="https://sage-metal-8c6.notion.site/25913b91bf6c80a783cae4826e447291" target="_blank" rel="noopener noreferrer" className="terms-link">
-                                    {t('signup.form.privacyLink')}
-                                </a>
-                            </span>
-                        </label>
-                        {errors.agreeToTerms && <span className="error-message">{errors.agreeToTerms}</span>}
                     </div>
-
-                    <button 
-                        type="submit" 
-                        className={`btn btn-primary signup-btn ${isLoading ? 'loading' : ''}`}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <>
-                                <div className="spinner"></div>
-                                {t('signup.form.submitting')}
-                            </>
-                        ) : (
-                            t('signup.form.submit')
-                        )}
-                    </button>
-
-                    <div className="signup-divider">
-                        <span>{t('signup.form.or')}</span>
-                    </div>
-
-                    <button 
-                        type="button" 
-                        className={`btn btn-google google-signin-btn ${isLoading ? 'loading' : ''}`}
-                        onClick={handleGoogleSignup}
-                        disabled={isLoading}
-                    >
-                        <svg className="google-icon" width="20" height="20" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        {t('signup.form.googleSignup')}
-                    </button>
-                </form>
                 )}
 
                 <div className="signup-footer">
