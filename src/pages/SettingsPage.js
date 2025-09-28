@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import PhoneVerificationForm from '../components/PhoneVerificationForm';
 import './SettingsPage.css';
 
 function SettingsPage() {
@@ -50,14 +49,6 @@ function SettingsPage() {
     const [subscriptionInfo, setSubscriptionInfo] = useState(null);
     const [isLoadingPayment, setIsLoadingPayment] = useState(false);
     
-    // 電話番号管理関連のstate
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [phoneVerified, setPhoneVerified] = useState(false);
-    const [showPhoneForm, setShowPhoneForm] = useState(false);
-    const [isLoadingPhone, setIsLoadingPhone] = useState(false);
-    const [phoneVerificationStep, setPhoneVerificationStep] = useState('input');
-    const [phoneFormData, setPhoneFormData] = useState({ phone_number: '', verification_code: '' });
-    const [phoneErrors, setPhoneErrors] = useState({});
     
     // コンポーネント初期化時にユーザー設定を取得
     useEffect(() => {
@@ -306,78 +297,7 @@ function SettingsPage() {
         }
     };
 
-    // PhoneVerificationForm成功時のハンドラー
-    const handlePhoneVerificationSuccess = (result) => {
-        setPhoneNumber(result.phone_number);
-        setPhoneVerified(true);
-        setShowPhoneForm(false);
-        
-        // ユーザー情報を更新
-        const updatedUser = {
-            ...user,
-            phone_number: result.phone_number,
-            phone_verified: true
-        };
-        updateUser(updatedUser);
-        
-        alert('電話番号が正常に認証されました');
-    };
 
-    // PhoneVerificationFormエラー時のハンドラー
-    const handlePhoneVerificationError = (error) => {
-        console.error('Phone verification error:', error);
-        alert('電話番号認証でエラーが発生しました: ' + error.message);
-    };
-
-    // 電話番号を削除
-    const removePhoneNumber = async () => {
-        if (!window.confirm('電話番号を削除しますか？')) {
-            return;
-        }
-
-        setIsLoadingPhone(true);
-
-        try {
-            const response = await authenticatedFetch('/api/auth/remove-phone', {
-                method: 'POST',
-                body: JSON.stringify({
-                    user_id: user.user_id
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setPhoneNumber('');
-                setPhoneVerified(false);
-                
-                // ユーザー情報を更新
-                const updatedUser = {
-                    ...user,
-                    phone_number: null,
-                    phone_verified: false
-                };
-                updateUser(updatedUser);
-                
-                alert('電話番号を削除しました');
-            } else {
-                alert(result.error || '電話番号の削除に失敗しました');
-            }
-        } catch (error) {
-            console.error('Phone remove error:', error);
-            alert('ネットワークエラーが発生しました');
-        } finally {
-            setIsLoadingPhone(false);
-        }
-    };
-
-    // 電話番号編集をキャンセル
-    const cancelPhoneEdit = () => {
-        setShowPhoneForm(false);
-        setPhoneVerificationStep('input');
-        setPhoneFormData({ phone_number: '', verification_code: '' });
-        setPhoneErrors({});
-    };
     
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
@@ -675,67 +595,6 @@ function SettingsPage() {
                     )}
                 </div>
 
-                {/* 電話番号管理セクション */}
-                <div className="settings-section">
-                    <h2 className="settings-section-title">電話番号管理</h2>
-                    
-                    {!showPhoneForm ? (
-                        <div className="phone-info">
-                            {phoneNumber ? (
-                                <div className="current-phone-info">
-                                    <div className="phone-status">
-                                        <span className="phone-number">{phoneNumber}</span>
-                                        <span className={`verification-badge ${phoneVerified ? 'verified' : 'unverified'}`}>
-                                            {phoneVerified ? '✓ 認証済み' : '未認証'}
-                                        </span>
-                                    </div>
-                                    <div className="phone-actions">
-                                        <button 
-                                            className="settings-button secondary"
-                                            onClick={() => setShowPhoneForm(true)}
-                                        >
-                                            電話番号を変更
-                                        </button>
-                                        <button 
-                                            className="settings-button danger"
-                                            onClick={removePhoneNumber}
-                                            disabled={isLoadingPhone}
-                                        >
-                                            {isLoadingPhone ? '削除中...' : '電話番号を削除'}
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="no-phone-info">
-                                    <p>電話番号が登録されていません</p>
-                                    <button 
-                                        className="settings-button primary"
-                                        onClick={() => setShowPhoneForm(true)}
-                                    >
-                                        電話番号を追加
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="phone-form">
-                            <PhoneVerificationForm
-                                userData={{ user_id: user.user_id }}
-                                onSuccess={handlePhoneVerificationSuccess}
-                                onError={handlePhoneVerificationError}
-                            />
-                            <div className="form-actions" style={{ marginTop: '1rem' }}>
-                                <button
-                                    type="button"
-                                    onClick={cancelPhoneEdit}
-                                    className="settings-button secondary"
-                                >
-                                    キャンセル
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
 
                 <div className="settings-section">
                     <h2 className="settings-section-title">プラン変更</h2>
