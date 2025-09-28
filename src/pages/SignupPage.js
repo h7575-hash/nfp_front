@@ -44,56 +44,7 @@ const SignupPage = () => {
         fetchConfig();
     }, []);
 
-    // デバイスフィンガープリントを生成する関数
-    const generateDeviceFingerprint = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('Device fingerprint', 2, 2);
-        const canvasFingerprint = canvas.toDataURL();
 
-        const fingerprint = [
-            navigator.userAgent,
-            navigator.language,
-            window.screen.width + 'x' + window.screen.height,
-            window.screen.colorDepth,
-            new Date().getTimezoneOffset(),
-            navigator.platform,
-            navigator.cookieEnabled,
-            canvasFingerprint
-        ].join('|');
-
-        // ハッシュ化して短縮
-        let hash = 0;
-        for (let i = 0; i < fingerprint.length; i++) {
-            const char = fingerprint.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return 'fp_' + Math.abs(hash).toString(36);
-    };
-
-    // デバイスIDとIPアドレスを取得する関数
-    const getDeviceInfo = async () => {
-        let deviceId = localStorage.getItem('deviceId');
-        if (!deviceId) {
-            // より永続的なデバイスフィンガープリントを生成
-            deviceId = generateDeviceFingerprint();
-            localStorage.setItem('deviceId', deviceId);
-        }
-
-        let ipAddress = '';
-        try {
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            ipAddress = data.ip;
-        } catch (error) {
-            console.warn('IP address取得に失敗:', error);
-        }
-
-        return { deviceId, ipAddress };
-    };
 
 
 
@@ -222,9 +173,6 @@ const SignupPage = () => {
         setIsLoading(true);
 
         try {
-            // デバイス情報を取得
-            const { deviceId, ipAddress } = await getDeviceInfo();
-
             // ユーザーデータを準備（Googleアカウント情報含む）
             const userData = {
                 email: googleUserInfo.email,
@@ -233,8 +181,6 @@ const SignupPage = () => {
                 occupation: formData.occupation,
                 position: formData.position,
                 birth_year: formData.birth_year,
-                device_id: deviceId,
-                ip_address: ipAddress,
                 social_login: {
                     service: 'google',
                     token: googleUserInfo.access_token
@@ -252,10 +198,8 @@ const SignupPage = () => {
                     purpose: formData.purpose,
                     industry: formData.industry,
                     occupation: formData.occupation,
-                        position: formData.position,
+                    position: formData.position,
                     birth_year: formData.birth_year,
-                    device_id: userData.device_id,
-                    ip_address: userData.ip_address,
                     plan: 'free'
                 }),
             });
