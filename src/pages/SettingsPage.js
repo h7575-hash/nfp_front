@@ -53,10 +53,6 @@ function SettingsPage() {
     // コンポーネント初期化時にユーザー設定を取得
     useEffect(() => {
         loadUserSettings();
-        if (user) {
-            setPhoneNumber(user.phone_number || '');
-            setPhoneVerified(user.phone_verified || false);
-        }
     }, [user]);
     
     const loadUserSettings = async () => {
