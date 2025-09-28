@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,27 @@ const RequestPage = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [requests, setRequests] = useState([]);
+    const [isLoadingList, setIsLoadingList] = useState(true);
+
+    // 既存リクエスト一覧を取得
+    const fetchRequests = async () => {
+        try {
+            setIsLoadingList(true);
+            const response = await axios.get('/api/requests/', {
+                params: { user_id: requestData.user_id }
+            });
+            setRequests(response.data);
+        } catch (error) {
+            console.error('Error fetching requests:', error);
+        } finally {
+            setIsLoadingList(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,7 +50,7 @@ const RequestPage = () => {
             console.log('Request created:', response.data);
             
             setSuccessMessage(t('register.success.message'));
-            
+
             // フォームをリセット
             setRequestData({
                 request: '',
@@ -38,12 +59,129 @@ const RequestPage = () => {
                 user_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
             });
 
+            // リクエスト一覧を再取得
+            fetchRequests();
+
         } catch (error) {
             console.error('Error during registration:', error);
             alert('登録中にエラーが発生しました。しばらく待ってから再度お試しください。');
         } finally {
             setIsLoading(false);
         }
+    };
+
+    // リクエストの削除
+    const handleDeleteRequest = async (requestId) => {
+        if (!window.confirm('この設定を削除してもよろしいですか？')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`/api/requests/${requestId}/`);
+            fetchRequests();
+        } catch (error) {
+            console.error('Error deleting request:', error);
+            alert('削除中にエラーが発生しました。');
+        }
+    };
+
+    // リクエストの有効/無効切替
+    const handleToggleRequest = async (requestId, currentStatus) => {
+        try {
+            await axios.patch(`/api/requests/${requestId}/`, {
+                is_active: !currentStatus
+            });
+            fetchRequests();
+        } catch (error) {
+            console.error('Error toggling request:', error);
+            alert('ステータス変更中にエラーが発生しました。');
+        }
+    };
+
+    // テーブルコンポーネント
+    const RequestsTable = () => {
+        if (isLoadingList) {
+            return (
+                <div className="text-center py-8">
+                    <div className="spinner mx-auto mb-4"></div>
+                    <p>{t('register.list.loading')}</p>
+                </div>
+            );
+        }
+
+        if (requests.length === 0) {
+            return (
+                <div className="text-center py-8">
+                    <p className="text-secondary">{t('register.list.empty')}</p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="table-responsive">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>{t('register.list.table.headers.type')}</th>
+                            <th>{t('register.list.table.headers.target')}</th>
+                            <th>{t('register.list.table.headers.content')}</th>
+                            <th>{t('register.list.table.headers.status')}</th>
+                            <th>{t('register.list.table.headers.createdAt')}</th>
+                            <th>{t('register.list.table.headers.actions')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {requests.map((request) => (
+                            <tr key={request.id}>
+                                <td>
+                                    <span className="badge badge-outline">
+                                        {t(`register.list.table.types.${request.request_type}`)}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div className="text-truncate" style={{ maxWidth: '200px' }}>
+                                        {request.search_obj}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="text-truncate" style={{ maxWidth: '250px' }}>
+                                        {request.request}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span className={`badge ${request.is_active ? 'badge-success' : 'badge-secondary'}`}>
+                                        {t(`register.list.table.status.${request.is_active ? 'active' : 'inactive'}`)}
+                                    </span>
+                                </td>
+                                <td>
+                                    {new Date(request.created_at).toLocaleDateString('ja-JP')}
+                                </td>
+                                <td>
+                                    <div className="btn-group btn-group-sm">
+                                        <button
+                                            type="button"
+                                            className={`btn ${request.is_active ? 'btn-warning' : 'btn-success'}`}
+                                            onClick={() => handleToggleRequest(request.id, request.is_active)}
+                                            title={t('register.list.table.actions.toggle')}
+                                        >
+                                            {request.is_active ? '停止' : '開始'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger"
+                                            onClick={() => handleDeleteRequest(request.id)}
+                                            title={t('register.list.table.actions.delete')}
+                                        >
+                                            削除
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
     };
 
     return (
@@ -64,11 +202,23 @@ const RequestPage = () => {
                 </div>
             )}
 
+            {/* 既存リクエスト一覧 */}
+            <div className="card mb-6">
+                <div className="card-header">
+                    <h2 className="card-title">{t('register.list.title')}</h2>
+                    <p className="card-subtitle">{t('register.list.subtitle')}</p>
+                </div>
+                <div className="card-body">
+                    <RequestsTable />
+                </div>
+            </div>
+
+            {/* 新規登録フォーム */}
             <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
                 <div className="card mb-6">
                     <div className="card-header">
-                        <h2 className="card-title">チェック設定</h2>
-                        <p className="card-subtitle">どのような情報をチェックするかを設定してください</p>
+                        <h2 className="card-title">{t('register.form.title')}</h2>
+                        <p className="card-subtitle">{t('register.form.subtitle')}</p>
                     </div>
                     <div className="card-body">
                         <div className="form-group">
