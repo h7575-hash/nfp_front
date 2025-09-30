@@ -63,9 +63,15 @@ const RequestPage = () => {
     };
 
     useEffect(() => {
+        console.log('RequestPage useEffect - user:', user);
+        console.log('RequestPage useEffect - user_id:', user?.user_id);
+
         if (user?.user_id) {
             setRequestData(prev => ({ ...prev, user_id: user.user_id }));
             fetchRequests();
+        } else {
+            console.warn('No user_id available, cannot fetch requests');
+            setIsLoadingList(false);
         }
     }, [user?.user_id]);
 
