@@ -3,6 +3,11 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
+// axiosのベースURLを設定
+const api = axios.create({
+    baseURL: 'https://nfp-front-1072071838370.asia-northeast1.run.app'
+});
+
 const RequestPage = () => {
     const { t } = useTranslation(['pages', 'common']);
     const { user } = useAuth();
@@ -25,10 +30,10 @@ const RequestPage = () => {
 
             // URL監視リクエストと検索リクエストを並行取得
             const [urlResponse, searchResponse] = await Promise.all([
-                axios.get('/api/url-requests/', {
+                api.get('/api/url-requests/', {
                     params: { user_id: requestData.user_id }
                 }),
-                axios.get('/api/search-requests/', {
+                api.get('/api/search-requests/', {
                     params: { user_id: requestData.user_id }
                 })
             ]);
@@ -90,14 +95,14 @@ const RequestPage = () => {
 
             if (requestData.request_type === 'search') {
                 // 検索リクエストの作成
-                response = await axios.post('/api/search-requests/', {
+                response = await api.post('/api/search-requests/', {
                     user_id: requestData.user_id,
                     request: requestData.request,
                     search_query: requestData.search_obj
                 });
             } else {
                 // URL監視リクエストの作成
-                response = await axios.post('/api/url-requests/', {
+                response = await api.post('/api/url-requests/', {
                     user_id: requestData.user_id,
                     request: requestData.request,
                     url: requestData.search_obj
@@ -134,11 +139,11 @@ const RequestPage = () => {
 
         try {
             if (request.request_type === 'search') {
-                await axios.delete('/api/search-requests/', {
+                await api.delete('/api/search-requests/', {
                     data: { search_id: request.id }
                 });
             } else {
-                await axios.delete('/api/url-requests/', {
+                await api.delete('/api/url-requests/', {
                     data: { monitor_id: request.id }
                 });
             }
@@ -155,12 +160,12 @@ const RequestPage = () => {
             const newStatus = currentStatus ? 'inactive' : 'active';
 
             if (request.request_type === 'search') {
-                await axios.put('/api/search-requests/', {
+                await api.put('/api/search-requests/', {
                     search_id: request.id,
                     status: newStatus
                 });
             } else {
-                await axios.put('/api/url-requests/', {
+                await api.put('/api/url-requests/', {
                     monitor_id: request.id,
                     status: newStatus
                 });
