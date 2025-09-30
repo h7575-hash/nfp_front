@@ -621,17 +621,6 @@ const SignupPage = () => {
                 ) : (
                     // ソーシャルログイン専用
                     <div className="social-signup-only">
-                        <div className="social-signup-info">
-                            <h3>ソーシャルログインでアカウント作成</h3>
-                            <p>プライバシー保護のため、個人情報を含まないメールアドレスをご利用ください。</p>
-                            <div className="privacy-note">
-                                <small>
-                                    推奨: user.business.2024@gmail.com<br/>
-                                    非推奨: yamada.taro.1990@gmail.com
-                                </small>
-                            </div>
-                        </div>
-
                         <button
                             type="button"
                             className={`btn btn-google google-signin-btn large ${isLoading ? 'loading' : ''}`}

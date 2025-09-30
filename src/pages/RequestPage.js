@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
 
 const RequestPage = () => {
     const { t } = useTranslation(['pages', 'common']);
+    const { user } = useAuth();
     const [requestData, setRequestData] = useState({
         request: '',
         request_type: 'search', // 'search' or 'site'
         search_obj: '',
-        user_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11' // TODO: 認証機能実装後に動的に取得する
+        user_id: user?.user_id || ''
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -61,8 +63,11 @@ const RequestPage = () => {
     };
 
     useEffect(() => {
-        fetchRequests();
-    }, []);
+        if (user?.user_id) {
+            setRequestData(prev => ({ ...prev, user_id: user.user_id }));
+            fetchRequests();
+        }
+    }, [user?.user_id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -96,12 +101,12 @@ const RequestPage = () => {
             console.log('Request created:', response.data);
             setSuccessMessage(t('register.success.message'));
 
-            // フォームをリセット
+            // フォームをリセット（user_idは保持）
             setRequestData({
                 request: '',
                 request_type: 'search',
                 search_obj: '',
-                user_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+                user_id: user?.user_id || ''
             });
 
             // リクエスト一覧を再取得
