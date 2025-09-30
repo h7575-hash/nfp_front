@@ -53,6 +53,7 @@ app.all('/api/*', async (req, res) => {
                 method: req.method,
                 url: finalUrl,
                 data: req.body,
+                params: req.query, // GETリクエストのクエリパラメータを転送
                 headers: {
                     ...headers, // Authorizationヘッダーが含まれる
                     'Content-Type': 'application/json',
@@ -83,6 +84,7 @@ app.all('/api/*', async (req, res) => {
                         method: req.method,
                         url: finalUrl,
                         data: req.body,
+                        params: req.query,
                         headers: {
                             'Content-Type': 'application/json'
                         },
