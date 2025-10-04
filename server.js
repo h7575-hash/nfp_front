@@ -49,9 +49,9 @@ app.all('/api/*', async (req, res) => {
             const headers = await client.getRequestHeaders();
             
             console.log('Got authorization header');
-            
-            // axiosを使用してリクエストを送信
-            backendResponse = await axios({
+
+            // axiosリクエスト設定をログ出力
+            const axiosConfig = {
                 method: req.method,
                 url: finalUrl,
                 data: req.body,
@@ -67,7 +67,16 @@ app.all('/api/*', async (req, res) => {
                 timeout: 30000,
                 // レスポンスタイプ
                 responseType: 'json'
-            });
+            };
+
+            console.log('Axios request config:', JSON.stringify({
+                method: axiosConfig.method,
+                url: axiosConfig.url,
+                params: axiosConfig.params
+            }));
+
+            // axiosを使用してリクエストを送信
+            backendResponse = await axios(axiosConfig);
             
             console.log('Authenticated request successful');
             
