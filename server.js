@@ -22,18 +22,20 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.all('/api/*', async (req, res) => {
     try {
         // Extract the path after /api
-        const requestedPath = req.originalUrl;
+        const requestedPath = req.path; // req.pathにはクエリパラメータが含まれない
         console.log('=== API PROXY REQUEST ===');
-        console.log('Full original URL:', requestedPath);
+        console.log('Full original URL:', req.originalUrl);
+        console.log('Path (without query):', requestedPath);
+        console.log('Query params:', req.query);
         console.log('Method:', req.method);
         console.log('Body:', req.body);
-        
-        // Convert /api/users -> /users
+
+        // Convert /api/users -> /users (クエリパラメータを除いたパスのみ)
         let backendPath = requestedPath.replace(/^\/api/, '');
         if (!backendPath || backendPath === '/') {
             backendPath = '/';
         }
-        
+
         console.log('Backend path:', backendPath);
         const finalUrl = `${BACKEND_URL}${backendPath}`;
         console.log('Final backend URL:', finalUrl);
