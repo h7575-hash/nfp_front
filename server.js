@@ -70,11 +70,14 @@ app.all('/api/*', async (req, res) => {
             console.log('Authenticated request successful');
             
         } catch (authError) {
-            console.error('Authentication error details:', {
+            console.error('Authentication error details:', JSON.stringify({
                 message: authError.message,
                 code: authError.code,
-                response: authError.response?.data
-            });
+                status: authError.response?.status,
+                statusText: authError.response?.statusText,
+                data: authError.response?.data,
+                stack: authError.stack
+            }, null, 2));
             
             // 開発環境用のフォールバック（本番環境では削除推奨）
             if (process.env.NODE_ENV === 'development') {

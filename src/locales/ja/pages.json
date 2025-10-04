@@ -60,7 +60,7 @@
       "submitting": "登録中...",
       "options": {
         "search": "キーワードでチェック",
-        "site": "特定サイトをチェック"
+        "site": "URLでチェック"
       },
       "placeholders": {
         "searchKeyword": "例: ChatGPT 新機能 2024",
