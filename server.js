@@ -50,12 +50,19 @@ app.all('/api/*', async (req, res) => {
             
             console.log('Got authorization header');
 
+            // クエリパラメータをURLに直接埋め込む（paramsオプションの問題を回避）
+            let requestUrl = finalUrl;
+            if (req.query && Object.keys(req.query).length > 0) {
+                const queryString = new URLSearchParams(req.query).toString();
+                requestUrl = `${finalUrl}?${queryString}`;
+            }
+
             // axiosリクエスト設定をログ出力
             const axiosConfig = {
                 method: req.method,
-                url: finalUrl,
+                url: requestUrl, // クエリパラメータを含む完全なURL
                 data: req.body,
-                params: req.query, // GETリクエストのクエリパラメータを転送
+                // params: req.query, // 削除：URLに直接埋め込んだ
                 headers: {
                     ...headers, // Authorizationヘッダーが含まれる
                     'Content-Type': 'application/json',
@@ -72,7 +79,7 @@ app.all('/api/*', async (req, res) => {
             console.log('Axios request config:', JSON.stringify({
                 method: axiosConfig.method,
                 url: axiosConfig.url,
-                params: axiosConfig.params
+                hasQueryParams: req.query && Object.keys(req.query).length > 0
             }));
 
             // axiosを使用してリクエストを送信
