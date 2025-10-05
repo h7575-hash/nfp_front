@@ -53,6 +53,7 @@
       "title": "新規チェック設定",
       "subtitle": "どのような情報をチェックするかを設定してください",
       "checkMethod": "チェック方法",
+      "titleLabel": "設定名",
       "searchKeyword": "検索キーワード",
       "siteUrl": "チェックするサイトURL",
       "notificationContent": "お知らせしてほしい内容",
@@ -63,6 +64,7 @@
         "site": "特定サイトをチェック"
       },
       "placeholders": {
+        "title": "例: ChatGPT最新情報",
         "searchKeyword": "例: ChatGPT 新機能 2024",
         "siteUrl": "例: https://openai.com/blog",
         "notificationContent": "例: ChatGPTの新しいプラグインや機能が発表されたらお知らせしてください。特にAPI関連の更新に興味があります。"
@@ -91,6 +93,7 @@
       "subtitle": "これまでに登録したニュースチェック設定の一覧です",
       "table": {
         "headers": {
+          "title": "設定名",
           "type": "チェック方法",
           "target": "チェック対象",
           "content": "通知内容",

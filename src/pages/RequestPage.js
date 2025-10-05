@@ -10,6 +10,7 @@ const RequestPage = () => {
         request: '',
         request_type: 'search', // 'search' or 'site'
         search_obj: '',
+        title: '',
         user_id: user?.user_id || ''
     });
 
@@ -93,14 +94,16 @@ const RequestPage = () => {
                 response = await axios.post('/api/search-requests/', {
                     user_id: requestData.user_id,
                     request: requestData.request,
-                    search_query: requestData.search_obj
+                    search_query: requestData.search_obj,
+                    title: requestData.title
                 });
             } else {
                 // URL監視リクエストの作成
                 response = await axios.post('/api/url-requests/', {
                     user_id: requestData.user_id,
                     request: requestData.request,
-                    url: requestData.search_obj
+                    url: requestData.search_obj,
+                    title: requestData.title
                 });
             }
 
@@ -112,6 +115,7 @@ const RequestPage = () => {
                 request: '',
                 request_type: 'search',
                 search_obj: '',
+                title: '',
                 user_id: user?.user_id || ''
             });
 
@@ -196,6 +200,7 @@ const RequestPage = () => {
                 <table className="table">
                     <thead>
                         <tr>
+                            <th>{t('register.list.table.headers.title')}</th>
                             <th>{t('register.list.table.headers.type')}</th>
                             <th>{t('register.list.table.headers.target')}</th>
                             <th>{t('register.list.table.headers.content')}</th>
@@ -207,6 +212,11 @@ const RequestPage = () => {
                     <tbody>
                         {requests.map((request) => (
                             <tr key={request.id}>
+                                <td>
+                                    <div className="text-truncate" style={{ maxWidth: '150px' }}>
+                                        {request.title || '-'}
+                                    </div>
+                                </td>
                                 <td>
                                     <span className="badge badge-outline">
                                         {t(`register.list.table.types.${request.request_type}`)}
@@ -313,20 +323,31 @@ const RequestPage = () => {
                         </div>
 
                         <div className="form-group">
+                            <label>{t('register.form.titleLabel')}</label>
+                            <input
+                                type="text"
+                                name="title"
+                                value={requestData.title}
+                                onChange={handleChange}
+                                placeholder={t('register.form.placeholders.title')}
+                            />
+                        </div>
+
+                        <div className="form-group">
                             <label>
                                 {requestData.request_type === 'search' ? t('register.form.searchKeyword') + ' *' : t('register.form.siteUrl') + ' *'}
                             </label>
-                            <input 
+                            <input
                                 type={requestData.request_type === 'site' ? 'url' : 'text'}
-                                name="search_obj" 
-                                value={requestData.search_obj} 
+                                name="search_obj"
+                                value={requestData.search_obj}
                                 onChange={handleChange}
                                 placeholder={
-                                    requestData.request_type === 'search' 
-                                        ? t('register.form.placeholders.searchKeyword') 
+                                    requestData.request_type === 'search'
+                                        ? t('register.form.placeholders.searchKeyword')
                                         : t('register.form.placeholders.siteUrl')
                                 }
-                                required 
+                                required
                             />
                             <div className="form-help-text">
                                 {requestData.request_type === 'search' ? (
