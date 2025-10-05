@@ -5,7 +5,12 @@ const axios = require('axios');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-const BACKEND_URL = 'https://newsdog-backend-1072071838370.asia-northeast1.run.app';
+// BaseURL: 環境変数 BACKEND_BASE_URL を優先し、未設定時は既定URLを利用
+const DEFAULT_BACKEND_URL = 'https://newsdog-backend-1072071838370.asia-northeast1.run.app';
+const BACKEND_URL = process.env.BACKEND_BASE_URL || DEFAULT_BACKEND_URL;
+if (!process.env.BACKEND_BASE_URL) {
+    console.warn('[nfp-front] BACKEND_BASE_URL is not set. Falling back to DEFAULT_BACKEND_URL');
+}
 
 // Google Auth Library の初期化
 // targetAudience を明示的に指定
@@ -37,6 +42,15 @@ app.all('/api/*', async (req, res) => {
         console.log('Backend path:', backendPath);
         const finalUrl = `${BACKEND_URL}${backendPath}`;
         console.log('Final backend URL:', finalUrl);
+
+        // GET/HEAD の場合はボディを送らない（GFE が GET ボディを 400 扱いするため）
+        const __method = (req.method || 'GET').toUpperCase();
+        if (['GET', 'HEAD'].includes(__method)) {
+            if (req.body && Object.keys(req.body).length > 0) {
+                console.log('Stripping request body for method', __method);
+            }
+            req.body = undefined;
+        }
         
         // 認証付きリクエストを送信
         let backendResponse;
