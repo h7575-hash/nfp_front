@@ -20,6 +20,7 @@ const RequestPage = () => {
     const [isLoadingList, setIsLoadingList] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingRequest, setEditingRequest] = useState(null);
+    const [deleteChecked, setDeleteChecked] = useState(false);
 
     // 既存リクエスト一覧を取得
     const fetchRequests = async () => {
@@ -85,6 +86,14 @@ const RequestPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // 削除チェックがある場合は確認
+        if (editingRequest && deleteChecked) {
+            if (!window.confirm('この設定を削除してもよろしいですか？')) {
+                return;
+            }
+        }
+
         setIsLoading(true);
         setSuccessMessage('');
 
@@ -93,22 +102,39 @@ const RequestPage = () => {
 
             if (editingRequest) {
                 // 編集モード
-                if (requestData.request_type === 'search') {
-                    response = await axios.put('/api/search-requests/', {
-                        search_id: editingRequest.id,
-                        request: requestData.request,
-                        search_query: requestData.search_obj,
-                        title: requestData.title
-                    });
+                if (deleteChecked) {
+                    // 削除
+                    if (requestData.request_type === 'search') {
+                        response = await axios.put('/api/search-requests/', {
+                            search_id: editingRequest.id,
+                            status: 'deleted'
+                        });
+                    } else {
+                        response = await axios.put('/api/url-requests/', {
+                            monitor_id: editingRequest.id,
+                            status: 'deleted'
+                        });
+                    }
+                    setSuccessMessage('設定を削除しました');
                 } else {
-                    response = await axios.put('/api/url-requests/', {
-                        monitor_id: editingRequest.id,
-                        request: requestData.request,
-                        url: requestData.search_obj,
-                        title: requestData.title
-                    });
+                    // 更新
+                    if (requestData.request_type === 'search') {
+                        response = await axios.put('/api/search-requests/', {
+                            search_id: editingRequest.id,
+                            request: requestData.request,
+                            search_query: requestData.search_obj,
+                            title: requestData.title
+                        });
+                    } else {
+                        response = await axios.put('/api/url-requests/', {
+                            monitor_id: editingRequest.id,
+                            request: requestData.request,
+                            url: requestData.search_obj,
+                            title: requestData.title
+                        });
+                    }
+                    setSuccessMessage('設定を更新しました');
                 }
-                setSuccessMessage('設定を更新しました');
             } else {
                 // 新規作成モード
                 if (requestData.request_type === 'search') {
@@ -141,6 +167,7 @@ const RequestPage = () => {
             });
             setShowForm(false);
             setEditingRequest(null);
+            setDeleteChecked(false);
 
             // リクエスト一覧を再取得
             fetchRequests();
@@ -150,44 +177,6 @@ const RequestPage = () => {
             alert('保存中にエラーが発生しました。しばらく待ってから再度お試しください。');
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    // リクエストの削除（編集フォームから呼び出される）
-    const handleDeleteRequest = async () => {
-        if (!editingRequest) return;
-
-        if (!window.confirm('この設定を削除してもよろしいですか？')) {
-            return;
-        }
-
-        try {
-            if (editingRequest.request_type === 'search') {
-                await axios.put('/api/search-requests/', {
-                    search_id: editingRequest.id,
-                    status: 'deleted'
-                });
-            } else {
-                await axios.put('/api/url-requests/', {
-                    monitor_id: editingRequest.id,
-                    status: 'deleted'
-                });
-            }
-
-            // フォームを閉じてリストを更新
-            setShowForm(false);
-            setEditingRequest(null);
-            setRequestData({
-                request: '',
-                request_type: 'search',
-                search_obj: '',
-                title: '',
-                user_id: user?.user_id || ''
-            });
-            fetchRequests();
-        } catch (error) {
-            console.error('Error deleting request:', error);
-            alert('削除中にエラーが発生しました。');
         }
     };
 
@@ -201,6 +190,7 @@ const RequestPage = () => {
             title: request.title || '',
             user_id: user?.user_id || ''
         });
+        setDeleteChecked(false);
         setShowForm(true);
     };
 
@@ -214,6 +204,7 @@ const RequestPage = () => {
             title: '',
             user_id: user?.user_id || ''
         });
+        setDeleteChecked(false);
         setShowForm(true);
     };
 
@@ -221,6 +212,7 @@ const RequestPage = () => {
     const handleCancel = () => {
         setShowForm(false);
         setEditingRequest(null);
+        setDeleteChecked(false);
         setRequestData({
             request: '',
             request_type: 'search',
@@ -409,28 +401,53 @@ const RequestPage = () => {
                                 </ul>
                             </div>
                         </div>
+
+                        {/* 削除チェックボックス（編集時のみ） */}
+                        {editingRequest && (
+                            <div className="form-group" style={{
+                                marginTop: '2rem',
+                                paddingTop: '1.5rem',
+                                borderTop: '1px solid var(--border-color, #ddd)'
+                            }}>
+                                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'var(--danger, #dc3545)' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={deleteChecked}
+                                        onChange={(e) => setDeleteChecked(e.target.checked)}
+                                        disabled={isLoading}
+                                        style={{ marginRight: '0.5rem' }}
+                                    />
+                                    この設定を削除する
+                                </label>
+                                {deleteChecked && (
+                                    <div className="form-help-text" style={{ color: 'var(--danger, #dc3545)' }}>
+                                        <p>⚠️ 「更新」ボタンを押すと、この設定が削除されます。</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="text-center">
-                    <button type="submit" className="btn btn-success" disabled={isLoading} style={{ marginRight: '0.5rem' }}>
+                    <button
+                        type="submit"
+                        className={`btn ${deleteChecked ? 'btn-danger' : 'btn-success'}`}
+                        disabled={isLoading}
+                        style={{ marginRight: '0.5rem' }}
+                    >
                         {isLoading ? (
                             <>
                                 <div className="spinner"></div>
-                                {editingRequest ? '更新中...' : t('register.form.submitting')}
+                                {deleteChecked ? '削除中...' : (editingRequest ? '更新中...' : t('register.form.submitting'))}
                             </>
                         ) : (
-                            editingRequest ? '更新' : t('register.form.submit')
+                            deleteChecked ? '削除' : (editingRequest ? '更新' : t('register.form.submit'))
                         )}
                     </button>
-                    <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading} style={{ marginRight: '0.5rem' }}>
+                    <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading}>
                         キャンセル
                     </button>
-                    {editingRequest && (
-                        <button type="button" className="btn btn-danger" onClick={handleDeleteRequest} disabled={isLoading}>
-                            削除
-                        </button>
-                    )}
                     <p className="text-secondary mt-4" style={{ fontSize: '0.875rem' }}>
                         {t('register.footer.description')}
                     </p>
