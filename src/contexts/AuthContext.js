@@ -25,13 +25,6 @@ export const AuthProvider = ({ children }) => {
                 if (savedToken && savedUser) {
                     setToken(savedToken);
                     setUser(JSON.parse(savedUser));
-                    
-                    // トークンの有効性を確認（オプション）
-                    const isValid = await validateToken(savedToken);
-                    if (!isValid) {
-                        // 無効なトークンの場合はクリア
-                        logout();
-                    }
                 }
             } catch (error) {
                 console.error('Auth initialization error:', error);
@@ -44,22 +37,6 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, []);
 
-    // トークンの有効性を確認する関数
-    const validateToken = async (token) => {
-        try {
-            const response = await fetch('/api/auth/validate', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            return response.ok;
-        } catch (error) {
-            console.error('Token validation error:', error);
-            return false;
-        }
-    };
 
     // Googleログイン関数
     const googleLogin = async (idToken) => {
