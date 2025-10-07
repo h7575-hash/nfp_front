@@ -32,14 +32,15 @@ app.all('/api/*', async (req, res) => {
         console.log('Full original URL:', requestedPath);
         console.log('Method:', req.method);
         console.log('Body:', req.body);
-        
-        // Convert /api/users -> /users
-        let backendPath = requestedPath.replace(/^\/api/, '');
+        console.log('Query params:', req.query);
+
+        // Convert /api/users -> /users (path only, without query string)
+        let backendPath = req.path.replace(/^\/api/, '');
         if (!backendPath || backendPath === '/') {
             backendPath = '/';
         }
-        
-        console.log('Backend path:', backendPath);
+
+        console.log('Backend path (without query):', backendPath);
         const finalUrl = `${BACKEND_URL}${backendPath}`;
         console.log('Final backend URL:', finalUrl);
 
