@@ -18,6 +18,8 @@ const RequestPage = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [requests, setRequests] = useState([]);
     const [isLoadingList, setIsLoadingList] = useState(true);
+    const [showForm, setShowForm] = useState(false);
+    const [editingRequest, setEditingRequest] = useState(null);
 
     // 既存リクエスト一覧を取得
     const fetchRequests = async () => {
@@ -89,28 +91,47 @@ const RequestPage = () => {
         try {
             let response;
 
-            if (requestData.request_type === 'search') {
-                // 検索リクエストの作成
-                response = await axios.post('/api/search-requests/', {
-                    user_id: requestData.user_id,
-                    request: requestData.request,
-                    search_query: requestData.search_obj,
-                    title: requestData.title
-                });
+            if (editingRequest) {
+                // 編集モード
+                if (requestData.request_type === 'search') {
+                    response = await axios.put('/api/search-requests/', {
+                        search_id: editingRequest.id,
+                        request: requestData.request,
+                        search_query: requestData.search_obj,
+                        title: requestData.title
+                    });
+                } else {
+                    response = await axios.put('/api/url-requests/', {
+                        monitor_id: editingRequest.id,
+                        request: requestData.request,
+                        url: requestData.search_obj,
+                        title: requestData.title
+                    });
+                }
+                setSuccessMessage('設定を更新しました');
             } else {
-                // URL監視リクエストの作成
-                response = await axios.post('/api/url-requests/', {
-                    user_id: requestData.user_id,
-                    request: requestData.request,
-                    url: requestData.search_obj,
-                    title: requestData.title
-                });
+                // 新規作成モード
+                if (requestData.request_type === 'search') {
+                    response = await axios.post('/api/search-requests/', {
+                        user_id: requestData.user_id,
+                        request: requestData.request,
+                        search_query: requestData.search_obj,
+                        title: requestData.title
+                    });
+                } else {
+                    response = await axios.post('/api/url-requests/', {
+                        user_id: requestData.user_id,
+                        request: requestData.request,
+                        url: requestData.search_obj,
+                        title: requestData.title
+                    });
+                }
+                setSuccessMessage(t('register.success.message'));
             }
 
-            console.log('Request created:', response.data);
-            setSuccessMessage(t('register.success.message'));
+            console.log('Request saved:', response.data);
 
-            // フォームをリセット（user_idは保持）
+            // フォームをリセット
             setRequestData({
                 request: '',
                 request_type: 'search',
@@ -118,13 +139,15 @@ const RequestPage = () => {
                 title: '',
                 user_id: user?.user_id || ''
             });
+            setShowForm(false);
+            setEditingRequest(null);
 
             // リクエスト一覧を再取得
             fetchRequests();
 
         } catch (error) {
             console.error('Error during registration:', error);
-            alert('登録中にエラーが発生しました。しばらく待ってから再度お試しください。');
+            alert('保存中にエラーが発生しました。しばらく待ってから再度お試しください。');
         } finally {
             setIsLoading(false);
         }
@@ -176,8 +199,47 @@ const RequestPage = () => {
         }
     };
 
-    // テーブルコンポーネント
-    const RequestsTable = () => {
+    // 編集ボタンをクリック
+    const handleEditRequest = (request) => {
+        setEditingRequest(request);
+        setRequestData({
+            request: request.request,
+            request_type: request.request_type,
+            search_obj: request.search_obj,
+            title: request.title || '',
+            user_id: user?.user_id || ''
+        });
+        setShowForm(true);
+    };
+
+    // 新規登録ボタンをクリック
+    const handleNewRequest = () => {
+        setEditingRequest(null);
+        setRequestData({
+            request: '',
+            request_type: 'search',
+            search_obj: '',
+            title: '',
+            user_id: user?.user_id || ''
+        });
+        setShowForm(true);
+    };
+
+    // キャンセルボタン
+    const handleCancel = () => {
+        setShowForm(false);
+        setEditingRequest(null);
+        setRequestData({
+            request: '',
+            request_type: 'search',
+            search_obj: '',
+            title: '',
+            user_id: user?.user_id || ''
+        });
+    };
+
+    // リストコンポーネント
+    const RequestsList = () => {
         if (isLoadingList) {
             return (
                 <div className="text-center py-8">
@@ -196,74 +258,59 @@ const RequestPage = () => {
         }
 
         return (
-            <div className="table-responsive">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>{t('register.list.table.headers.title')}</th>
-                            <th>{t('register.list.table.headers.type')}</th>
-                            <th>{t('register.list.table.headers.target')}</th>
-                            <th>{t('register.list.table.headers.content')}</th>
-                            <th>{t('register.list.table.headers.status')}</th>
-                            <th>{t('register.list.table.headers.createdAt')}</th>
-                            <th>{t('register.list.table.headers.actions')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {requests.map((request) => (
-                            <tr key={request.id}>
-                                <td>
-                                    <div className="text-truncate" style={{ maxWidth: '150px' }}>
-                                        {request.title || '-'}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span className="badge badge-outline">
-                                        {t(`register.list.table.types.${request.request_type}`)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div className="text-truncate" style={{ maxWidth: '200px' }}>
-                                        {request.search_obj}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="text-truncate" style={{ maxWidth: '250px' }}>
-                                        {request.request}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span className={`badge ${request.is_active ? 'badge-success' : 'badge-secondary'}`}>
-                                        {t(`register.list.table.status.${request.is_active ? 'active' : 'inactive'}`)}
-                                    </span>
-                                </td>
-                                <td>
-                                    {new Date(request.created_at).toLocaleDateString('ja-JP')}
-                                </td>
-                                <td>
-                                    <div className="btn-group btn-group-sm">
-                                        <button
-                                            type="button"
-                                            className={`btn ${request.is_active ? 'btn-warning' : 'btn-success'}`}
-                                            onClick={() => handleToggleRequest(request, request.is_active)}
-                                            title={t('register.list.table.actions.toggle')}
-                                        >
-                                            {request.is_active ? '停止' : '開始'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger"
-                                            onClick={() => handleDeleteRequest(request)}
-                                            title={t('register.list.table.actions.delete')}
-                                        >
-                                            削除
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className="requests-list">
+                {requests.map((request) => (
+                    <div key={request.id} className="request-item" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '1rem',
+                        marginBottom: '0.5rem',
+                        border: '1px solid var(--border-color, #ddd)',
+                        borderRadius: '4px',
+                        backgroundColor: 'var(--card-bg, white)'
+                    }}>
+                        <div style={{ flex: 1 }}>
+                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>
+                                {request.title || '無題の設定'}
+                            </h4>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #666)' }}>
+                                <span className="badge badge-outline" style={{ marginRight: '0.5rem' }}>
+                                    {t(`register.list.table.types.${request.request_type}`)}
+                                </span>
+                                <span className={`badge ${request.is_active ? 'badge-success' : 'badge-secondary'}`}>
+                                    {t(`register.list.table.status.${request.is_active ? 'active' : 'inactive'}`)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="btn-group btn-group-sm">
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => handleEditRequest(request)}
+                                title="編集"
+                            >
+                                編集
+                            </button>
+                            <button
+                                type="button"
+                                className={`btn ${request.is_active ? 'btn-warning' : 'btn-success'}`}
+                                onClick={() => handleToggleRequest(request, request.is_active)}
+                                title={request.is_active ? '停止' : '開始'}
+                            >
+                                {request.is_active ? '停止' : '開始'}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-danger"
+                                onClick={() => handleDeleteRequest(request)}
+                                title="削除"
+                            >
+                                削除
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
         );
     };
@@ -288,21 +335,35 @@ const RequestPage = () => {
 
             {/* 既存リクエスト一覧 */}
             <div className="card mb-6">
-                <div className="card-header">
-                    <h2 className="card-title">{t('register.list.title')}</h2>
-                    <p className="card-subtitle">{t('register.list.subtitle')}</p>
+                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h2 className="card-title">{t('register.list.title')}</h2>
+                        <p className="card-subtitle">{t('register.list.subtitle')}</p>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-success"
+                        onClick={handleNewRequest}
+                    >
+                        ＋ 新規登録
+                    </button>
                 </div>
                 <div className="card-body">
-                    <RequestsTable />
+                    <RequestsList />
                 </div>
             </div>
 
-            {/* 新規登録フォーム */}
-            <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
+            {/* 編集/新規登録フォーム */}
+            {showForm && (
+                <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
                 <div className="card mb-6">
                     <div className="card-header">
-                        <h2 className="card-title">{t('register.form.title')}</h2>
-                        <p className="card-subtitle">{t('register.form.subtitle')}</p>
+                        <h2 className="card-title">
+                            {editingRequest ? '設定を編集' : t('register.form.title')}
+                        </h2>
+                        <p className="card-subtitle">
+                            {editingRequest ? '設定内容を変更して保存してください' : t('register.form.subtitle')}
+                        </p>
                     </div>
                     <div className="card-body">
                         <div className="form-group">
@@ -382,21 +443,25 @@ const RequestPage = () => {
                 </div>
 
                 <div className="text-center">
-                    <button type="submit" className="btn btn-success" disabled={isLoading}>
+                    <button type="submit" className="btn btn-success" disabled={isLoading} style={{ marginRight: '1rem' }}>
                         {isLoading ? (
                             <>
                                 <div className="spinner"></div>
-                                {t('register.form.submitting')}
+                                {editingRequest ? '更新中...' : t('register.form.submitting')}
                             </>
                         ) : (
-                            t('register.form.submit')
+                            editingRequest ? '更新' : t('register.form.submit')
                         )}
+                    </button>
+                    <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading}>
+                        キャンセル
                     </button>
                     <p className="text-secondary mt-4" style={{ fontSize: '0.875rem' }}>
                         {t('register.footer.description')}
                     </p>
                 </div>
             </form>
+            )}
         </div>
     );
 };
