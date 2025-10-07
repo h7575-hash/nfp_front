@@ -409,21 +409,23 @@ const RequestPage = () => {
                                 paddingTop: '1.5rem',
                                 borderTop: '1px solid var(--border-color, #ddd)'
                             }}>
-                                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'var(--danger, #dc3545)' }}>
+                                <label style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    color: '#dc3545',
+                                    fontWeight: 'normal',
+                                    margin: 0
+                                }}>
                                     <input
                                         type="checkbox"
                                         checked={deleteChecked}
                                         onChange={(e) => setDeleteChecked(e.target.checked)}
                                         disabled={isLoading}
-                                        style={{ marginRight: '0.5rem' }}
+                                        style={{ marginRight: '0.5rem', width: 'auto' }}
                                     />
                                     この設定を削除する
                                 </label>
-                                {deleteChecked && (
-                                    <div className="form-help-text" style={{ color: 'var(--danger, #dc3545)' }}>
-                                        <p>⚠️ 「更新」ボタンを押すと、この設定が削除されます。</p>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
@@ -434,7 +436,14 @@ const RequestPage = () => {
                         type="submit"
                         className={`btn ${deleteChecked ? 'btn-danger' : 'btn-success'}`}
                         disabled={isLoading}
-                        style={{ marginRight: '0.5rem' }}
+                        style={{
+                            marginRight: '0.5rem',
+                            ...(deleteChecked && {
+                                backgroundColor: '#dc3545',
+                                borderColor: '#dc3545',
+                                color: 'white'
+                            })
+                        }}
                     >
                         {isLoading ? (
                             <>
