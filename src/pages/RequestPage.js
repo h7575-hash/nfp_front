@@ -153,49 +153,41 @@ const RequestPage = () => {
         }
     };
 
-    // リクエストの削除
-    const handleDeleteRequest = async (request) => {
+    // リクエストの削除（編集フォームから呼び出される）
+    const handleDeleteRequest = async () => {
+        if (!editingRequest) return;
+
         if (!window.confirm('この設定を削除してもよろしいですか？')) {
             return;
         }
 
         try {
-            if (request.request_type === 'search') {
-                await axios.delete('/api/search-requests/', {
-                    data: { search_id: request.id }
+            if (editingRequest.request_type === 'search') {
+                await axios.put('/api/search-requests/', {
+                    search_id: editingRequest.id,
+                    status: 'deleted'
                 });
             } else {
-                await axios.delete('/api/url-requests/', {
-                    data: { monitor_id: request.id }
+                await axios.put('/api/url-requests/', {
+                    monitor_id: editingRequest.id,
+                    status: 'deleted'
                 });
             }
+
+            // フォームを閉じてリストを更新
+            setShowForm(false);
+            setEditingRequest(null);
+            setRequestData({
+                request: '',
+                request_type: 'search',
+                search_obj: '',
+                title: '',
+                user_id: user?.user_id || ''
+            });
             fetchRequests();
         } catch (error) {
             console.error('Error deleting request:', error);
             alert('削除中にエラーが発生しました。');
-        }
-    };
-
-    // リクエストの有効/無効切替
-    const handleToggleRequest = async (request, currentStatus) => {
-        try {
-            const newStatus = currentStatus ? 'inactive' : 'active';
-
-            if (request.request_type === 'search') {
-                await axios.put('/api/search-requests/', {
-                    search_id: request.id,
-                    status: newStatus
-                });
-            } else {
-                await axios.put('/api/url-requests/', {
-                    monitor_id: request.id,
-                    status: newStatus
-                });
-            }
-            fetchRequests();
-        } catch (error) {
-            console.error('Error toggling request:', error);
-            alert('ステータス変更中にエラーが発生しました。');
         }
     };
 
@@ -275,40 +267,18 @@ const RequestPage = () => {
                                 {request.title || '無題の設定'}
                             </h4>
                             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #666)' }}>
-                                <span className="badge badge-outline" style={{ marginRight: '0.5rem' }}>
+                                <span className="badge badge-outline">
                                     {t(`register.list.table.types.${request.request_type}`)}
-                                </span>
-                                <span className={`badge ${request.is_active ? 'badge-success' : 'badge-secondary'}`}>
-                                    {t(`register.list.table.status.${request.is_active ? 'active' : 'inactive'}`)}
                                 </span>
                             </div>
                         </div>
-                        <div className="btn-group btn-group-sm">
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={() => handleEditRequest(request)}
-                                title="編集"
-                            >
-                                編集
-                            </button>
-                            <button
-                                type="button"
-                                className={`btn ${request.is_active ? 'btn-warning' : 'btn-success'}`}
-                                onClick={() => handleToggleRequest(request, request.is_active)}
-                                title={request.is_active ? '停止' : '開始'}
-                            >
-                                {request.is_active ? '停止' : '開始'}
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-danger"
-                                onClick={() => handleDeleteRequest(request)}
-                                title="削除"
-                            >
-                                削除
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleEditRequest(request)}
+                        >
+                            編集
+                        </button>
                     </div>
                 ))}
             </div>
@@ -443,7 +413,7 @@ const RequestPage = () => {
                 </div>
 
                 <div className="text-center">
-                    <button type="submit" className="btn btn-success" disabled={isLoading} style={{ marginRight: '1rem' }}>
+                    <button type="submit" className="btn btn-success" disabled={isLoading} style={{ marginRight: '0.5rem' }}>
                         {isLoading ? (
                             <>
                                 <div className="spinner"></div>
@@ -453,9 +423,14 @@ const RequestPage = () => {
                             editingRequest ? '更新' : t('register.form.submit')
                         )}
                     </button>
-                    <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading}>
+                    <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading} style={{ marginRight: '0.5rem' }}>
                         キャンセル
                     </button>
+                    {editingRequest && (
+                        <button type="button" className="btn btn-danger" onClick={handleDeleteRequest} disabled={isLoading}>
+                            削除
+                        </button>
+                    )}
                     <p className="text-secondary mt-4" style={{ fontSize: '0.875rem' }}>
                         {t('register.footer.description')}
                     </p>
