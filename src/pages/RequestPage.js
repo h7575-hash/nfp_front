@@ -174,7 +174,13 @@ const RequestPage = () => {
 
         } catch (error) {
             console.error('Error during registration:', error);
-            alert('保存中にエラーが発生しました。しばらく待ってから再度お試しください。');
+
+            // 403エラー（robots.txt禁止）の場合
+            if (error.response?.status === 403) {
+                alert(t('register.errors.robotsBlocked'));
+            } else {
+                alert(t('register.errors.general'));
+            }
         } finally {
             setIsLoading(false);
         }
