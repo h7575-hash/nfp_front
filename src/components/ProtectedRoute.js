@@ -5,11 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
     const location = useLocation();
-    
-    // 開発環境では認証をスキップ
-    const isDevelopment = process.env.NODE_ENV === 'development' || 
-                         window.location.hostname === 'localhost' || 
-                         window.location.hostname === '127.0.0.1';
 
     // 認証状態の読み込み中はローディング表示
     if (loading) {
@@ -40,11 +35,6 @@ const ProtectedRoute = ({ children }) => {
                 `}</style>
             </div>
         );
-    }
-
-    // 開発環境では認証チェックをスキップ
-    if (isDevelopment) {
-        return children;
     }
 
     // 未認証の場合はログインページにリダイレクト

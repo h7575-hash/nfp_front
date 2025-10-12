@@ -74,44 +74,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // ログイン関数
-    const login = async (email, password) => {
-        try {
-            setLoading(true);
-            
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'ログインに失敗しました');
-            }
-
-            // 成功時の処理
-            const { token: newToken, user: userData } = data;
-            
-            setToken(newToken);
-            setUser(userData);
-            
-            // ローカルストレージに保存
-            localStorage.setItem('authToken', newToken);
-            localStorage.setItem('userInfo', JSON.stringify(userData));
-            
-            return { success: true, user: userData };
-        } catch (error) {
-            console.error('Login error:', error);
-            return { success: false, error: error.message };
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // ログアウト関数
     const logout = () => {
         setUser(null);
@@ -165,7 +127,6 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         isAuthenticated: !!user,
-        login,
         googleLogin,
         logout,
         updateUser,
